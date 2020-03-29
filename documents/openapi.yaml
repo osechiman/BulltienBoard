@@ -1,0 +1,86 @@
+openapi: 3.0.1
+info:
+  title: Coding Battle
+  description: ''
+  contact:
+    email: apiteam@swagger.io
+  version: 1.0.0
+servers:
+  - url: http://localhost:8008/api/v1
+tags:
+  - name: question
+    description: 問題の一覧を取得する
+paths:
+  /questions:
+    get:
+      tags:
+        - question
+      summary: 問題一覧を取得する
+      operationId: updatePet
+      responses:
+        400:
+          description: 不正解
+          content: {}
+        200:
+          description: 正解
+          content: {}
+  /questions/{id}:
+    post:
+      tags:
+        - question
+      summary: 問題一覧を取得する
+      parameters:
+        - name: id
+          in: path
+          description: Question ID
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Optional description in *Markdown*
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Question'
+      responses:
+        400:
+          description: 不正解
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        200:
+          description: 正解
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+components:
+  schemas:
+    Question:
+      required:
+        - answer
+      type: object
+      properties:
+        answer:
+          type: string
+          format: string
+          example: "package main..."
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          format: int32
+          example: 200
+        message:
+          type: string
+          format: string
+          example: "OK"
+        data:
+          items:
+            type: array
+            format: array
+            example: "[]"

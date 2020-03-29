@@ -1,0 +1,58 @@
+linters-settings:
+  govet:
+    check-shadowing: true
+  golint:
+    min-confidence: 0
+  gocyclo:
+    min-complexity: 10
+  maligned:
+    suggest-new: true
+  dupl:
+    threshold: 100
+  goconst:
+    min-len: 2
+    min-occurrences: 2
+  depguard:
+    list-type: blacklist
+    packages:
+      # logging is allowed only by logutils.Log, logrus
+      # is allowed to use only in logutils package
+      - github.com/sirupsen/logrus
+  misspell:
+    locale: US
+  lll:
+    line-length: 140
+  goimports:
+    local-prefixes: github.com/golangci/golangci-lint
+  errcheck:
+
+linters:
+  enable-all: true
+  disable:
+    - godox #TODO: すぐに外せないTODOコメント等が多すぎるので、それらを消せる健全な状況になったら外す。
+    - maligned
+    - prealloc
+    - gochecknoglobals
+    - dupl #FIXME: dummyがなくなり次第有効化
+    - gochecknoinits
+
+run:
+  skip-dirs:
+    - vendor/
+  skip-files:
+    - ".*test.go$"
+    - ".*mock_response.go$"
+    - ".*mock.go$"
+
+issues:
+  exclude-rules:
+    - text: "weak cryptographic primitive"
+      linters:
+        - gosec
+
+# golangci.com configuration
+# https://github.com/golangci/golangci/wiki/Configuration
+service:
+  golangci-lint-version: 1.17.x # use the fixed version to not introduce new linters unexpectedly
+  prepare:
+    - echo "here I can run custom commands, but no preparation needed for this repo"
