@@ -38,21 +38,132 @@ func Listen() {
 				questions.POST("", postQuestion)
 				questions.DELETE("/:id", deleteQuestionByID)
 			}
+
+			bulletinBoards := v1.Group("/bulletinBoards")
+			{
+				bulletinBoards.GET("", listBulletinBoard)
+				bulletinBoards.GET("/:id", getBulletinBoardByID)
+				bulletinBoards.POST("", postBulletinBoard)
+			}
+
+			threads := v1.Group("/threads")
+			{
+				threads.GET("", listThread)
+				threads.GET("/:id", getThreadByID)
+				threads.POST("", postThread)
+			}
 		}
 	}
 
 	router.Run(":8080")
 }
 
+// postThread はPostされてきたjsonを保存します。
+func postThread(c *gin.Context) {
+	tr := gateways.GetInMemoryRepositoryInstance()
+	tp := presenters.NewThreadPresenter()
+	tc := controllers.NewThreadController(tr)
+	t, err := tc.AddThread(c)
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := tp.ConvertToHttpThreadResponse(t)
+	c.JSON(http.StatusCreated, res)
+	return
+}
+
+// getThreadByID 指定したIDのThreadをjsonで出力します。
+func getThreadByID(c *gin.Context) {
+	tid := c.Param("id")
+	tr := gateways.GetInMemoryRepositoryInstance()
+	tp := presenters.NewThreadPresenter()
+	tc := controllers.NewThreadController(tr)
+	t, err := tc.GetThreadByID(tid)
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := tp.ConvertToHttpThreadResponse(t)
+	c.JSON(http.StatusOK, res)
+	return
+}
+
+// listThread はThreadの一覧をjsonで出力します。
+func listThread(c *gin.Context) {
+	r := gateways.GetInMemoryRepositoryInstance()
+	tp := presenters.NewThreadPresenter()
+	tc := controllers.NewThreadController(r)
+	tl, err := tc.ListThread()
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := tp.ConvertToHttpThreadListResponse(tl)
+	c.JSON(http.StatusOK, res)
+	return
+}
+
+// listBulletinBoard はBulletinBoardの一覧をjsonで出力します。
+func listBulletinBoard(c *gin.Context) {
+	r := gateways.GetInMemoryRepositoryInstance()
+	bbp := presenters.NewBulletinBoardPresenter()
+	bbc := controllers.NewBulletinBoardController(r)
+	bbl, err := bbc.ListBulletinBoard()
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := bbp.ConvertToHttpBulletinBoardListResponse(bbl)
+	c.JSON(http.StatusOK, res)
+	return
+}
+
+// getBulletinBoardByID 指定したIDのBulletinBoardをjsonで出力します。
+func getBulletinBoardByID(c *gin.Context) {
+	bbid := c.Param("id")
+	bbr := gateways.GetInMemoryRepositoryInstance()
+	bbp := presenters.NewBulletinBoardPresenter()
+	bbc := controllers.NewBulletinBoardController(bbr)
+	bb, err := bbc.GetBulletinBoardByID(bbid)
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := bbp.ConvertToHttpBulletinBoardResponse(bb)
+	c.JSON(http.StatusOK, res)
+	return
+}
+
+// postBulletinBoard はPostされてきたjsonを保存します。
+func postBulletinBoard(c *gin.Context) {
+	bbr := gateways.GetInMemoryRepositoryInstance()
+	bbp := presenters.NewBulletinBoardPresenter()
+	bbc := controllers.NewBulletinBoardController(bbr)
+	bb, err := bbc.AddBulletinBoard(c)
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := bbp.ConvertToHttpBulletinBoardResponse(bb)
+	c.JSON(http.StatusCreated, res)
+	return
+}
+
 // listQuestion はQuestionの一覧をjsonで出力します。
 func listQuestion(c *gin.Context) {
-	qr := gateways.NewInMemoryRepository()
+	qr := gateways.GetInMemoryRepositoryInstance()
 	qp := presenters.NewQuestionPresenter()
 	qc := controllers.NewQuestionController(qr)
 	ql, err := qc.ListQuestion()
 	if err != nil {
-		c.JSON(http.StatusNotFound, qp.ConvertToHttpErrorResponse(http.StatusNotFound, err))
-		logger.Debug(c, err.Error())
+		responseByError(c, err)
 		return
 	}
 
@@ -64,19 +175,12 @@ func listQuestion(c *gin.Context) {
 // getQuestionByID 指定したIDのQuestionをjsonで出力します。
 func getQuestionByID(c *gin.Context) {
 	qid := c.Param("id")
-	qr := gateways.NewInMemoryRepository()
+	qr := gateways.GetInMemoryRepositoryInstance()
 	qp := presenters.NewQuestionPresenter()
 	qc := controllers.NewQuestionController(qr)
 	q, err := qc.GetQuestionByID(qid)
 	if err != nil {
-		switch t := err.(type) {
-		case *valueobjects.NotFoundError:
-			c.JSON(http.StatusNotFound, qp.ConvertToHttpErrorResponse(http.StatusNotFound, t))
-			logger.Debug(c, t.Error())
-		default:
-			c.JSON(http.StatusInternalServerError, qp.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
-			logger.Error(c, t.Error())
-		}
+		responseByError(c, err)
 		return
 	}
 
@@ -87,19 +191,12 @@ func getQuestionByID(c *gin.Context) {
 
 // postQuestion はPostされてきたjsonを保存します。
 func postQuestion(c *gin.Context) {
-	qr := gateways.NewInMemoryRepository()
+	qr := gateways.GetInMemoryRepositoryInstance()
 	qp := presenters.NewQuestionPresenter()
 	qc := controllers.NewQuestionController(qr)
 	q, err := qc.AddQuestion(c)
 	if err != nil {
-		switch t := err.(type) {
-		case *valueobjects.NotFoundError:
-			c.JSON(http.StatusNotFound, qp.ConvertToHttpErrorResponse(http.StatusNotFound, t))
-			logger.Debug(c, t.Error())
-		default:
-			c.JSON(http.StatusInternalServerError, qp.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
-			logger.Error(c, t.Error())
-		}
+		responseByError(c, err)
 		return
 	}
 
@@ -111,23 +208,36 @@ func postQuestion(c *gin.Context) {
 // deleteQuestionByID 指定したIDのQuestionを削除します。
 func deleteQuestionByID(c *gin.Context) {
 	qid := c.Param("id")
-	qr := gateways.NewInMemoryRepository()
+	qr := gateways.GetInMemoryRepositoryInstance()
 	qp := presenters.NewQuestionPresenter()
 	qc := controllers.NewQuestionController(qr)
 	err := qc.DeleteQuestionByID(qid)
 	if err != nil {
-		switch t := err.(type) {
-		case *valueobjects.NotFoundError:
-			c.JSON(http.StatusNotFound, qp.ConvertToHttpErrorResponse(http.StatusNotFound, t))
-			logger.Debug(c, t.Error())
-		default:
-			c.JSON(http.StatusInternalServerError, qp.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
-			logger.Error(c, t.Error())
-		}
+		responseByError(c, err)
 		return
 	}
 
 	res := qp.ConvertToHttpDeleteQuestionResponse(http.StatusOK, qid)
 	c.JSON(http.StatusOK, res)
 	return
+}
+
+func responseByError(c *gin.Context, err error) {
+	ep := presenters.NewErrorPresenter()
+	if err != nil {
+		switch t := err.(type) {
+		case *valueobjects.NotFoundError:
+			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
+			logger.Debug(c, t.Error())
+		case *valueobjects.MissingRequiredFieldsError:
+			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
+			logger.Warn(c, t.Error())
+		case *valueobjects.ParameterBindingError:
+			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
+			logger.Warn(c, t.Error())
+		default:
+			c.JSON(http.StatusInternalServerError, ep.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
+			logger.Error(c, t.Error())
+		}
+	}
 }

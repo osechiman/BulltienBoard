@@ -5,18 +5,10 @@ import (
 	"vspro/entities"
 )
 
-type QuestionPresenter struct {
-	HTTPQuestionResponse HTTPQuestionResponse
-}
+type QuestionPresenter struct{}
 
 func NewQuestionPresenter() *QuestionPresenter {
 	return &QuestionPresenter{}
-}
-
-type HTTPQuestionResponse struct {
-	Status  int
-	Message string
-	Data    interface{}
 }
 
 type Questions []*Question
@@ -28,28 +20,28 @@ type Question struct {
 	Text       string
 }
 
-func (qp *QuestionPresenter) ConvertToHttpDeleteQuestionResponse(httpStatusCode int, qid string) *HTTPQuestionResponse {
+func (qp *QuestionPresenter) ConvertToHttpDeleteQuestionResponse(httpStatusCode int, qid string) *HTTPResponse {
 	message := qid + " has been deleted."
 	return newHTTPSuccessResponse(httpStatusCode, http.StatusText(httpStatusCode), message)
 }
 
-func (qp *QuestionPresenter) ConvertToHttpErrorResponse(httpStatusCode int, err error) *HTTPQuestionResponse {
+func (qp *QuestionPresenter) ConvertToHttpErrorResponse(httpStatusCode int, err error) *HTTPResponse {
 	return newHTTPErrorResponse(httpStatusCode, http.StatusText(httpStatusCode), err)
 }
 
-func (qp *QuestionPresenter) ConvertToHttpQuestionListResponse(ql []*entities.Question) *HTTPQuestionResponse {
+func (qp *QuestionPresenter) ConvertToHttpQuestionListResponse(ql []*entities.Question) *HTTPResponse {
 	res := Questions{}
 	for _, q := range ql {
 		res = append(res, convertEntitiesQuestionToQuestion(q))
 	}
-	return newHTTPQuestionResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
-func (qp *QuestionPresenter) ConvertToHttpQuestionResponse(q *entities.Question) *HTTPQuestionResponse {
+func (qp *QuestionPresenter) ConvertToHttpQuestionResponse(q *entities.Question) *HTTPResponse {
 	res := Questions{}
 	pq := convertEntitiesQuestionToQuestion(q)
 	res = append(res, pq)
-	return newHTTPQuestionResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
 func convertEntitiesQuestionToQuestion(q *entities.Question) *Question {
@@ -60,20 +52,4 @@ func convertEntitiesQuestionToQuestion(q *entities.Question) *Question {
 		Text:       q.Text,
 	}
 	return &pq
-}
-
-func newHTTPQuestionResponse(status int, message string, data Questions) *HTTPQuestionResponse {
-	return &HTTPQuestionResponse{Status: status, Message: message, Data: data}
-}
-
-func newHTTPSuccessResponse(status int, message string, i interface{}) *HTTPQuestionResponse {
-	res := make([]interface{}, 0)
-	res = append(res, i)
-	return &HTTPQuestionResponse{Status: status, Message: message, Data: res}
-}
-
-func newHTTPErrorResponse(status int, message string, err error) *HTTPQuestionResponse {
-	res := make([]string, 0)
-	res = append(res, err.Error())
-	return &HTTPQuestionResponse{Status: status, Message: message, Data: res}
 }

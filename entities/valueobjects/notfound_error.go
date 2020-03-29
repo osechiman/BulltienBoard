@@ -1,16 +1,20 @@
 package valueobjects
 
-import "fmt"
+import (
+	"fmt"
+	"net/http"
+)
 
 type NotFoundError struct {
-	msg  string
-	code string
+	msg            string
+	code           int
+	HTTPStatusCode int
 }
 
 func NewNotFoundError(msg interface{}) *NotFoundError {
-	return &NotFoundError{msg: fmt.Sprint(msg), code: "001"}
+	return &NotFoundError{msg: fmt.Sprint(msg), code: ErrorCodeNotFound, HTTPStatusCode: http.StatusNotFound}
 }
 
 func (nfe *NotFoundError) Error() string {
-	return nfe.msg + " is not found. error code is " + nfe.code
+	return nfe.msg + " not found. error code is " + fmt.Sprint(nfe.code)
 }
