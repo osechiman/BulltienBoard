@@ -2,7 +2,7 @@ package usecases
 
 import (
 	"vspro/entities"
-	"vspro/entities/valueobjects"
+	"vspro/entities/errorobjects"
 )
 
 type BulletinBoardUsecase struct {
@@ -14,17 +14,17 @@ func NewBulletinBoardUsecase(r BulletinBoardRepositorer) *BulletinBoardUsecase {
 }
 
 func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID entities.BulletinBoardID, threadRepository ThreadRepositorer) (*entities.BulletinBoard, error) {
-	tl, err := threadRepository.ListThreadByBulletinBoard(ID)
+	tl, err := threadRepository.ListThreadByBulletinBoardID(ID)
 	if err != nil {
 		switch err.(type) {
-		case *valueobjects.NotFoundError:
+		case *errorobjects.NotFoundError:
 			tl = make([]*entities.Thread, 0)
 		default:
 			return nil, err
 		}
 	}
 
-	b, err := bbu.Repository.GetBulletinBoardByID(ID.Get())
+	b, err := bbu.Repository.GetBulletinBoardByID(ID)
 	if err != nil {
 		return nil, err
 	}

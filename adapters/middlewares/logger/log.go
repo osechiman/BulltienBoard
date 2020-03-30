@@ -136,8 +136,6 @@ func DefaultLogger(c *gin.Context) {
 	c.Set("Logger", NewLoggerMan(c))
 	// 処理開始時のログ
 	Info(c, "start")
-	i, _ := c.Get("Logger")
-	Info(c, i)
 
 	c.Next()
 	// 処理終了時のログ

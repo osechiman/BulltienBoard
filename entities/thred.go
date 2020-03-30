@@ -8,7 +8,7 @@ type Thread struct {
 	ID              ThreadID
 	BulletinBoardID BulletinBoardID
 	Title           string
-	Comment         []*Comment
+	Comments        []*Comment
 }
 
 func NewThread(ID ThreadID, bID BulletinBoardID, title string) Thread {
@@ -18,4 +18,5 @@ func NewThread(ID ThreadID, bID BulletinBoardID, title string) Thread {
 type ThreadID interface {
 	Get() valueobjects.ThreadID
 	String() string
+	Equals(id valueobjects.ThreadID) bool
 }

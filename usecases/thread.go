@@ -1,8 +1,8 @@
 package usecases
 
 import (
-	"vspro/adapters/gateways"
 	"vspro/entities"
+	"vspro/entities/errorobjects"
 )
 
 type ThreadUsecase struct {
@@ -13,13 +13,28 @@ func NewThreadUsecase(r ThreadRepositorer) *ThreadUsecase {
 	return &ThreadUsecase{Repository: r}
 }
 
-func (tu *ThreadUsecase) GetThreadByID(ID entities.ThreadID) (*entities.Thread, error) {
-	return tu.Repository.GetThreadByID(ID.Get())
+func (tu *ThreadUsecase) GetThreadByID(ID entities.ThreadID, commentRepository CommentRepositorer) (*entities.Thread, error) {
+	cl, err := commentRepository.ListCommentByThreadID(ID)
+	if err != nil {
+		switch err.(type) {
+		case *errorobjects.NotFoundError:
+			cl = make([]*entities.Comment, 0)
+		default:
+			return nil, err
+		}
+	}
+
+	t, err := tu.Repository.GetThreadByID(ID)
+	if err != nil {
+		return nil, err
+	}
+
+	t.Comments = cl
+	return t, nil
 }
 
-func (tu *ThreadUsecase) AddThread(t entities.Thread) error {
-	br := gateways.GetInMemoryRepositoryInstance()
-	_, err := br.GetBulletinBoardByID(t.BulletinBoardID)
+func (tu *ThreadUsecase) AddThread(t entities.Thread, bulletinBoardRepository BulletinBoardRepositorer) error {
+	_, err := bulletinBoardRepository.GetBulletinBoardByID(t.BulletinBoardID)
 	if err != nil {
 		return err
 	}
@@ -31,5 +46,5 @@ func (tu *ThreadUsecase) ListThread() ([]*entities.Thread, error) {
 }
 
 func (tu *ThreadUsecase) ListThreadByBulletinBoardID(bID entities.BulletinBoardID) ([]*entities.Thread, error) {
-	return tu.Repository.ListThreadByBulletinBoard(bID)
+	return tu.Repository.ListThreadByBulletinBoardID(bID)
 }

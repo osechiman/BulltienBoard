@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"vspro/adapters/gateways"
 	"vspro/entities"
+	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
 	"vspro/usecases"
 
@@ -31,7 +33,7 @@ func (tc *ThreadController) GetThreadByID(ID string) (*entities.Thread, error) {
 		return nil, err
 	}
 
-	return tu.GetThreadByID(tid)
+	return tu.GetThreadByID(tid, gateways.GetInMemoryRepositoryInstance())
 }
 
 // コマンド・クエリの原則からは外れるがAPIのレスポンスに登録したデータを返却するためにエンティティを返す
@@ -39,13 +41,13 @@ func (tc *ThreadController) AddThread(c *gin.Context) (*entities.Thread, error) 
 	pt := PostThread{}
 	err := c.BindJSON(&pt)
 	if err != nil {
-		return nil, valueobjects.NewParameterBindingError(err)
+		return nil, errorobjects.NewParameterBindingError(err)
 	}
 
 	validate := validator.New()
 	err = validate.Struct(pt)
 	if err != nil {
-		return nil, valueobjects.NewMissingRequiredFieldsError(err)
+		return nil, errorobjects.NewMissingRequiredFieldsError(err)
 	}
 
 	tid, err := valueobjects.NewThreadID("")
@@ -58,10 +60,10 @@ func (tc *ThreadController) AddThread(c *gin.Context) (*entities.Thread, error) 
 	if err != nil {
 		return nil, err
 	}
-	t := entities.NewThread(tid, bid, pt.Title)
+	t := entities.NewThread(tid.Get(), bid, pt.Title)
 
 	tu := usecases.NewThreadUsecase(tc.Repository)
-	return &t, tu.AddThread(t)
+	return &t, tu.AddThread(t, gateways.GetInMemoryRepositoryInstance())
 }
 
 func (tc *ThreadController) ListThread() ([]*entities.Thread, error) {
@@ -78,6 +80,6 @@ func (tc *ThreadController) ListThreadByByBulletinBoard(bID string) ([]*entities
 	return tu.ListThreadByBulletinBoardID(bid)
 }
 
-func convertIDToThreadID(ID string) (entities.ThreadID, error) {
+func convertIDToThreadID(ID string) (valueobjects.ThreadID, error) {
 	return valueobjects.NewThreadID(ID)
 }

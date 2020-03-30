@@ -3,6 +3,7 @@ package controllers
 import (
 	"vspro/adapters/gateways"
 	"vspro/entities"
+	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
 	"vspro/usecases"
 
@@ -42,12 +43,12 @@ func (bbc *BulletinBoardController) AddBulletinBoard(c *gin.Context) (*entities.
 	pb := PostBulletinBoard{}
 	err := c.BindJSON(&pb)
 	if err != nil {
-		return nil, valueobjects.NewParameterBindingError(err)
+		return nil, errorobjects.NewParameterBindingError(err)
 	}
 	validate := validator.New()
 	err = validate.Struct(pb)
 	if err != nil {
-		return nil, valueobjects.NewMissingRequiredFieldsError(err)
+		return nil, errorobjects.NewMissingRequiredFieldsError(err)
 	}
 
 	bbid, err := valueobjects.NewBulletinBoardID("")

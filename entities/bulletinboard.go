@@ -17,4 +17,5 @@ func NewBulletinBoard(ID BulletinBoardID, title string) BulletinBoard {
 type BulletinBoardID interface {
 	Get() valueobjects.BulletinBoardID
 	String() string
+	Equals(id valueobjects.BulletinBoardID) bool
 }

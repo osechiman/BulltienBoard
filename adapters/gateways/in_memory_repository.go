@@ -2,13 +2,14 @@ package gateways
 
 import (
 	"vspro/entities"
+	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
 )
 
 var inMemoryRepository = NewInMemoryRepository()
-var questions = make(map[entities.QuestionID]*entities.Question)
-var bulletinBoards = make(map[entities.BulletinBoardID]*entities.BulletinBoard)
-var threads = make(map[entities.ThreadID]*entities.Thread)
+var bulletinBoards = make(map[valueobjects.BulletinBoardID]*entities.BulletinBoard)
+var threads = make(map[valueobjects.ThreadID]*entities.Thread)
+var comments = make(map[valueobjects.CommentID]*entities.Comment)
 
 type InMemoryRepository struct{}
 
@@ -20,47 +21,10 @@ func GetInMemoryRepositoryInstance() *InMemoryRepository {
 	return inMemoryRepository
 }
 
-func (i *InMemoryRepository) GetQuestionByID(ID entities.QuestionID) (*entities.Question, error) {
-	_, exist := questions[ID.Get()]
-	if !exist {
-		return nil, valueobjects.NewNotFoundError(ID.String())
-	}
-	return questions[ID.Get()], nil
-}
-
-func (i *InMemoryRepository) ListQuestion() ([]*entities.Question, error) {
-	var qs []*entities.Question
-	if len(questions) == 0 {
-		return nil, valueobjects.NewNotFoundError("question not registered,")
-	}
-	for _, v := range questions {
-		qs = append(qs, v)
-	}
-	return qs, nil
-}
-
-func (i *InMemoryRepository) AddQuestion(q entities.Question) error {
-	questions[q.ID.Get()] = &q
-	return nil
-}
-
-func (i *InMemoryRepository) AnswerQuestion() (bool, error) {
-	return true, nil
-}
-
-func (i *InMemoryRepository) DeleteQuestionByID(ID entities.QuestionID) error {
-	_, exist := questions[ID.Get()]
-	if !exist {
-		return valueobjects.NewNotFoundError(ID.String())
-	}
-	delete(questions, ID.Get())
-	return nil
-}
-
 func (i *InMemoryRepository) GetBulletinBoardByID(ID entities.BulletinBoardID) (*entities.BulletinBoard, error) {
 	_, exist := bulletinBoards[ID.Get()]
 	if !exist {
-		return nil, valueobjects.NewNotFoundError(ID.String())
+		return nil, errorobjects.NewNotFoundError(ID.String())
 	}
 	return bulletinBoards[ID.Get()], nil
 }
@@ -73,7 +37,7 @@ func (i *InMemoryRepository) AddBulletinBoard(b entities.BulletinBoard) error {
 func (i *InMemoryRepository) ListBulletinBoard() ([]*entities.BulletinBoard, error) {
 	var bs []*entities.BulletinBoard
 	if len(bulletinBoards) == 0 {
-		return nil, valueobjects.NewNotFoundError("bulletinBoard not registered,")
+		return nil, errorobjects.NewNotFoundError("bulletinBoard not registered,")
 	}
 	for _, v := range bulletinBoards {
 		bs = append(bs, v)
@@ -84,7 +48,7 @@ func (i *InMemoryRepository) ListBulletinBoard() ([]*entities.BulletinBoard, err
 func (i *InMemoryRepository) ListThread() ([]*entities.Thread, error) {
 	var ts []*entities.Thread
 	if len(threads) == 0 {
-		return nil, valueobjects.NewNotFoundError("thread not registered,")
+		return nil, errorobjects.NewNotFoundError("thread not registered,")
 	}
 	for _, v := range threads {
 		ts = append(ts, v)
@@ -92,20 +56,20 @@ func (i *InMemoryRepository) ListThread() ([]*entities.Thread, error) {
 	return ts, nil
 }
 
-func (i *InMemoryRepository) ListThreadByBulletinBoard(bID entities.BulletinBoardID) ([]*entities.Thread, error) {
+func (i *InMemoryRepository) ListThreadByBulletinBoardID(bID entities.BulletinBoardID) ([]*entities.Thread, error) {
 	var ts []*entities.Thread
 	if len(threads) == 0 {
-		return nil, valueobjects.NewNotFoundError("thread not registered,")
+		return nil, errorobjects.NewNotFoundError("thread not registered,")
 	}
 
 	for _, v := range threads {
-		if v.BulletinBoardID == bID.Get() {
+		if bID.Equals(v.BulletinBoardID.Get()) {
 			ts = append(ts, v)
 		}
 	}
 
 	if len(ts) == 0 {
-		return nil, valueobjects.NewNotFoundError(bID.String() + " associated with thread")
+		return nil, errorobjects.NewNotFoundError(bID.String() + " associated with thread")
 	}
 
 	return ts, nil
@@ -114,12 +78,47 @@ func (i *InMemoryRepository) ListThreadByBulletinBoard(bID entities.BulletinBoar
 func (i *InMemoryRepository) GetThreadByID(ID entities.ThreadID) (*entities.Thread, error) {
 	_, exist := threads[ID.Get()]
 	if !exist {
-		return nil, valueobjects.NewNotFoundError(ID.String())
+		return nil, errorobjects.NewNotFoundError(ID.String())
 	}
 	return threads[ID.Get()], nil
 }
 
 func (i *InMemoryRepository) AddThread(t entities.Thread) error {
 	threads[t.ID.Get()] = &t
+	return nil
+}
+
+func (i *InMemoryRepository) ListComment() ([]*entities.Comment, error) {
+	var cs []*entities.Comment
+	if len(comments) == 0 {
+		return nil, errorobjects.NewNotFoundError("comment not registered,")
+	}
+	for _, v := range comments {
+		cs = append(cs, v)
+	}
+	return cs, nil
+}
+
+func (i *InMemoryRepository) ListCommentByThreadID(tID entities.ThreadID) ([]*entities.Comment, error) {
+	var cs []*entities.Comment
+	if len(comments) == 0 {
+		return nil, errorobjects.NewNotFoundError("comment not registered,")
+	}
+
+	for _, v := range comments {
+		if tID.Equals(v.ThreadID.Get()) {
+			cs = append(cs, v)
+		}
+	}
+
+	if len(cs) == 0 {
+		return nil, errorobjects.NewNotFoundError(tID.String() + " associated with thread")
+	}
+
+	return cs, nil
+}
+
+func (i *InMemoryRepository) AddComment(c entities.Comment) error {
+	comments[c.ID.Get()] = &c
 	return nil
 }

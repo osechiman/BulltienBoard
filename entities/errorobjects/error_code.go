@@ -1,4 +1,4 @@
-package valueobjects
+package errorobjects
 
 const (
 	// 原因不明のエラー level:Error

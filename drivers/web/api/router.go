@@ -7,7 +7,7 @@ import (
 	"vspro/adapters/middlewares/logger"
 	"vspro/adapters/presenters"
 	"vspro/drivers/configs"
-	"vspro/entities/valueobjects"
+	"vspro/entities/errorobjects"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,14 +31,6 @@ func Listen() {
 	{
 		v1 := api.Group("/v1")
 		{
-			questions := v1.Group("/questions")
-			{
-				questions.GET("", listQuestion)
-				questions.GET("/:id", getQuestionByID)
-				questions.POST("", postQuestion)
-				questions.DELETE("/:id", deleteQuestionByID)
-			}
-
 			bulletinBoards := v1.Group("/bulletinBoards")
 			{
 				bulletinBoards.GET("", listBulletinBoard)
@@ -52,10 +44,48 @@ func Listen() {
 				threads.GET("/:id", getThreadByID)
 				threads.POST("", postThread)
 			}
+
+			comments := v1.Group("/comments")
+			{
+				comments.GET("", listComment)
+				comments.POST("", postComment)
+			}
 		}
 	}
 
 	router.Run(":8080")
+}
+
+// postComment はPostされてきたjsonを保存します。
+func postComment(c *gin.Context) {
+	cr := gateways.GetInMemoryRepositoryInstance()
+	cp := presenters.NewCommentPresenter()
+	cc := controllers.NewCommentController(cr)
+	cm, err := cc.AddComment(c)
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := cp.ConvertToHttpCommentResponse(cm)
+	c.JSON(http.StatusCreated, res)
+	return
+}
+
+// listComment はCommentの一覧をjsonで出力します。
+func listComment(c *gin.Context) {
+	r := gateways.GetInMemoryRepositoryInstance()
+	cp := presenters.NewCommentPresenter()
+	cc := controllers.NewCommentController(r)
+	cl, err := cc.ListComment()
+	if err != nil {
+		responseByError(c, err)
+		return
+	}
+
+	res := cp.ConvertToHttpCommentListResponse(cl)
+	c.JSON(http.StatusOK, res)
+	return
 }
 
 // postThread はPostされてきたjsonを保存します。
@@ -156,83 +186,17 @@ func postBulletinBoard(c *gin.Context) {
 	return
 }
 
-// listQuestion はQuestionの一覧をjsonで出力します。
-func listQuestion(c *gin.Context) {
-	qr := gateways.GetInMemoryRepositoryInstance()
-	qp := presenters.NewQuestionPresenter()
-	qc := controllers.NewQuestionController(qr)
-	ql, err := qc.ListQuestion()
-	if err != nil {
-		responseByError(c, err)
-		return
-	}
-
-	res := qp.ConvertToHttpQuestionListResponse(ql)
-	c.JSON(http.StatusOK, res)
-	return
-}
-
-// getQuestionByID 指定したIDのQuestionをjsonで出力します。
-func getQuestionByID(c *gin.Context) {
-	qid := c.Param("id")
-	qr := gateways.GetInMemoryRepositoryInstance()
-	qp := presenters.NewQuestionPresenter()
-	qc := controllers.NewQuestionController(qr)
-	q, err := qc.GetQuestionByID(qid)
-	if err != nil {
-		responseByError(c, err)
-		return
-	}
-
-	res := qp.ConvertToHttpQuestionResponse(q)
-	c.JSON(http.StatusOK, res)
-	return
-}
-
-// postQuestion はPostされてきたjsonを保存します。
-func postQuestion(c *gin.Context) {
-	qr := gateways.GetInMemoryRepositoryInstance()
-	qp := presenters.NewQuestionPresenter()
-	qc := controllers.NewQuestionController(qr)
-	q, err := qc.AddQuestion(c)
-	if err != nil {
-		responseByError(c, err)
-		return
-	}
-
-	res := qp.ConvertToHttpQuestionResponse(q)
-	c.JSON(http.StatusCreated, res)
-	return
-}
-
-// deleteQuestionByID 指定したIDのQuestionを削除します。
-func deleteQuestionByID(c *gin.Context) {
-	qid := c.Param("id")
-	qr := gateways.GetInMemoryRepositoryInstance()
-	qp := presenters.NewQuestionPresenter()
-	qc := controllers.NewQuestionController(qr)
-	err := qc.DeleteQuestionByID(qid)
-	if err != nil {
-		responseByError(c, err)
-		return
-	}
-
-	res := qp.ConvertToHttpDeleteQuestionResponse(http.StatusOK, qid)
-	c.JSON(http.StatusOK, res)
-	return
-}
-
 func responseByError(c *gin.Context, err error) {
 	ep := presenters.NewErrorPresenter()
 	if err != nil {
 		switch t := err.(type) {
-		case *valueobjects.NotFoundError:
+		case *errorobjects.NotFoundError:
 			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
 			logger.Debug(c, t.Error())
-		case *valueobjects.MissingRequiredFieldsError:
+		case *errorobjects.MissingRequiredFieldsError:
 			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
 			logger.Warn(c, t.Error())
-		case *valueobjects.ParameterBindingError:
+		case *errorobjects.ParameterBindingError:
 			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
 			logger.Warn(c, t.Error())
 		default:

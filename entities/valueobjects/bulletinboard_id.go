@@ -2,6 +2,8 @@ package valueobjects
 
 // ValueObjectは外部ライブラリに依存して良いというポリシーで運用。
 import (
+	"vspro/entities/errorobjects"
+
 	"github.com/google/uuid"
 )
 
@@ -19,7 +21,7 @@ func NewBulletinBoardID(ID string) (BulletinBoardID, error) {
 	if err != nil {
 		uid, err = uuid.NewRandom()
 		if err != nil {
-			return BulletinBoardID{}, NewInternalServerError(err.Error())
+			return BulletinBoardID{}, errorobjects.NewInternalServerError(err.Error())
 		}
 	}
 
@@ -35,8 +37,8 @@ func (bb BulletinBoardID) String() string {
 	return bb.str
 }
 
-func (bb BulletinBoardID) Equals(other BulletinBoardID) bool {
-	if (bb.Get() == other.Get()) && (bb.String() == other.String()) {
+func (bb BulletinBoardID) Equals(id BulletinBoardID) bool {
+	if (bb.Get() == id.Get()) && (bb.String() == id.String()) {
 		return true
 	}
 	return false

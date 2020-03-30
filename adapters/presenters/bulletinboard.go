@@ -2,7 +2,6 @@ package presenters
 
 import (
 	"net/http"
-	"vspro/adapters/controllers"
 	"vspro/entities"
 )
 
@@ -15,9 +14,9 @@ func NewBulletinBoardPresenter() *BulletinBoardPresenter {
 type BulletinBoards []*BulletinBoard
 
 type BulletinBoard struct {
-	ID     string
-	Title  string
-	Thread interface{} `json:",omitempty"`
+	ID      string
+	Title   string
+	Threads []*Thread
 }
 
 func (bbp *BulletinBoardPresenter) ConvertToHttpErrorResponse(httpStatusCode int, err error) *HTTPResponse {
@@ -25,7 +24,7 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpErrorResponse(httpStatusCode int
 }
 
 func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardListResponse(bbl []*entities.BulletinBoard) *HTTPResponse {
-	res := BulletinBoards{}
+	res := make([]*BulletinBoard, 0)
 	for _, bb := range bbl {
 		// レスポンス時のデータ転送量を減らす為にListResponseではThreadのデータは返さない
 		bb.Threads = nil
@@ -35,7 +34,7 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardListResponse(bbl []
 }
 
 func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardResponse(bb *entities.BulletinBoard) *HTTPResponse {
-	res := BulletinBoards{}
+	res := make([]*BulletinBoard, 0)
 	pbb := convertEntitiesBulletinBoardToBulletinBoard(bb)
 	res = append(res, pbb)
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
@@ -43,25 +42,26 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardResponse(bb *entiti
 
 func convertEntitiesBulletinBoardToBulletinBoard(bb *entities.BulletinBoard) *BulletinBoard {
 	pbb := BulletinBoard{
-		ID:     bb.ID.String(),
-		Title:  bb.Title,
-		Thread: bb.Threads,
+		ID:    bb.ID.String(),
+		Title: bb.Title,
 	}
 
 	// see https://golang.org/doc/faq#nil_error
 	if bb.Threads == nil {
-		pbb.Thread = nil
+		pbb.Threads = make([]*Thread, 0)
 		return &pbb
 	}
 
-	tl := make([]controllers.PostThread, 0)
+	tl := make([]*Thread, 0)
+	cl := make([]*Comment, 0)
 	for _, t := range bb.Threads {
-		tl = append(tl, controllers.PostThread{
+		tl = append(tl, &Thread{
 			ID:              t.ID.String(),
 			BulletinBoardID: t.BulletinBoardID.String(),
 			Title:           t.Title,
+			Comments:        cl,
 		})
 	}
-	pbb.Thread = tl
+	pbb.Threads = tl
 	return &pbb
 }

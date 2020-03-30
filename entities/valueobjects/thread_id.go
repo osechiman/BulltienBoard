@@ -8,7 +8,7 @@ import (
 type threadID uuid.UUID
 
 type ThreadID struct {
-	id  commentID
+	id  threadID
 	str string
 }
 
@@ -21,7 +21,7 @@ func NewThreadID(ID string) (ThreadID, error) {
 		}
 	}
 
-	tid := ThreadID{id: commentID(uid), str: uid.String()}
+	tid := ThreadID{id: threadID(uid), str: uid.String()}
 	return tid, nil
 }
 

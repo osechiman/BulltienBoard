@@ -1,4 +1,4 @@
-package valueobjects
+package errorobjects
 
 import (
 	"fmt"

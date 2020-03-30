@@ -3,7 +3,7 @@ valueobjects は不変のオブジェクトをまとめる為のパッケージ�
 
 How to Use
 
-エラーオブジェクトやEntityのIDはここで記述します。
+EntityのIDはここで記述します。
 
 */
 package valueobjects
