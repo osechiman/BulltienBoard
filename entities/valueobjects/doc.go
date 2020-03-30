@@ -1,5 +1,5 @@
 /*
-valueobjects は不変のオブジェクトをまとめる為のパッケージです。
+Package valueobjects は不変のオブジェクトをまとめる為のパッケージです。
 
 How to Use
 

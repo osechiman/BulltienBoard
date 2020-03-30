@@ -1,5 +1,5 @@
 /*
-controllers は外部から取得してきた値をusecasesが解釈出来る値に変更します。
+Package controllers は外部から取得してきた値をusecasesが解釈出来る値に変更します。
 
 How to Use
 

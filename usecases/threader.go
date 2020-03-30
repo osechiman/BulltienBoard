@@ -4,6 +4,7 @@ import (
 	"vspro/entities"
 )
 
+// ThreadRepositorer はThreadRepositoryのインターフェースです。
 type ThreadRepositorer interface {
 	GetThreadByID(ID entities.ThreadID) (*entities.Thread, error)
 	ListThread() ([]*entities.Thread, error)

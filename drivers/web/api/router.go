@@ -17,6 +17,7 @@ func Listen() {
 	gin.DisableConsoleColor()
 
 	c := configs.GetOsConfigInstance()
+	// configerインターフェースを満たして実装すれば以下の様に置き換え可能になります。
 	// c := configs.GetYamlConfigInstance()
 	switch c.Get().Environment {
 	case "production":
@@ -27,6 +28,7 @@ func Listen() {
 	router.Use(gin.Recovery())
 	router.Use(logger.DefaultLogger)
 
+	// パス毎にGroupを分けるポリシーです。
 	api := router.Group("/api")
 	{
 		v1 := api.Group("/v1")
@@ -56,7 +58,7 @@ func Listen() {
 	router.Run(":8080")
 }
 
-// postComment はPostされてきたjsonを保存します。
+// postComment はPostされてきたComment(json)を保存します。
 func postComment(c *gin.Context) {
 	cr := gateways.GetInMemoryRepositoryInstance()
 	cp := presenters.NewCommentPresenter()
@@ -88,7 +90,7 @@ func listComment(c *gin.Context) {
 	return
 }
 
-// postThread はPostされてきたjsonを保存します。
+// postThread はPostされてきたThread(json)を保存します。
 func postThread(c *gin.Context) {
 	tr := gateways.GetInMemoryRepositoryInstance()
 	tp := presenters.NewThreadPresenter()
@@ -170,7 +172,7 @@ func getBulletinBoardByID(c *gin.Context) {
 	return
 }
 
-// postBulletinBoard はPostされてきたjsonを保存します。
+// postBulletinBoard はPostされてきたBulletinBoard(json)を保存します。
 func postBulletinBoard(c *gin.Context) {
 	bbr := gateways.GetInMemoryRepositoryInstance()
 	bbp := presenters.NewBulletinBoardPresenter()
@@ -186,6 +188,7 @@ func postBulletinBoard(c *gin.Context) {
 	return
 }
 
+// responseByError はerrorobjectsのType毎にjsonを出力します。
 func responseByError(c *gin.Context, err error) {
 	ep := presenters.NewErrorPresenter()
 	if err != nil {
