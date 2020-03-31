@@ -3,17 +3,21 @@ package usecases
 import (
 	"vspro/entities"
 	"vspro/entities/errorobjects"
+	"vspro/entities/valueobjects"
 )
 
+// ThreadUsecase はThreadに対するUsecaseを定義するものです。
 type ThreadUsecase struct {
-	Repository ThreadRepositorer
+	Repository ThreadRepositorer // Repositorer は外部データソースに存在するentities.Threadを操作する際に利用するインターフェースです。
 }
 
+// NewThreadUsecase はThreadUsecaseを初期化します。
 func NewThreadUsecase(r ThreadRepositorer) *ThreadUsecase {
 	return &ThreadUsecase{Repository: r}
 }
 
-func (tu *ThreadUsecase) GetThreadByID(ID entities.ThreadID, commentRepository CommentRepositorer) (*entities.Thread, error) {
+// GetThreadByID は指定されたvalueobjects.ThreadIDを持つentities.Threadを取得します。
+func (tu *ThreadUsecase) GetThreadByID(ID valueobjects.ThreadID, commentRepository CommentRepositorer) (*entities.Thread, error) {
 	cl, err := commentRepository.ListCommentByThreadID(ID)
 	if err != nil {
 		switch err.(type) {
@@ -33,18 +37,21 @@ func (tu *ThreadUsecase) GetThreadByID(ID entities.ThreadID, commentRepository C
 	return t, nil
 }
 
+// AddThread はentities.Threadを追加します。
 func (tu *ThreadUsecase) AddThread(t entities.Thread, bulletinBoardRepository BulletinBoardRepositorer) error {
-	_, err := bulletinBoardRepository.GetBulletinBoardByID(t.BulletinBoardID)
+	_, err := bulletinBoardRepository.GetBulletinBoardByID(t.BulletinBoardID.Get())
 	if err != nil {
 		return err
 	}
 	return tu.Repository.AddThread(t)
 }
 
+// ListThread はentities.Threadの一覧を取得します。
 func (tu *ThreadUsecase) ListThread() ([]*entities.Thread, error) {
 	return tu.Repository.ListThread()
 }
 
-func (tu *ThreadUsecase) ListThreadByBulletinBoardID(bID entities.BulletinBoardID) ([]*entities.Thread, error) {
+// ListThreadByBulletinBoardID は指定されたvalueobjects.BulletinBoardIDを持つentities.Threadの一覧を取得します。
+func (tu *ThreadUsecase) ListThreadByBulletinBoardID(bID valueobjects.BulletinBoardID) ([]*entities.Thread, error) {
 	return tu.Repository.ListThreadByBulletinBoardID(bID)
 }

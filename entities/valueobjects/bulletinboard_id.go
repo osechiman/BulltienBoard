@@ -1,18 +1,18 @@
 package valueobjects
 
-// ValueObjectは外部ライブラリに依存して良いというポリシーで運用。
 import (
 	"vspro/entities/errorobjects"
 
 	"github.com/google/uuid"
 )
 
+// bulletinBoardID はuuid.UUIDを独自のTypeに再定義したものです。
 type bulletinBoardID uuid.UUID
 
 // BulletinBoardID は掲示板のIDです。
 type BulletinBoardID struct {
-	id  bulletinBoardID
-	str string
+	id  bulletinBoardID // id はbulletinBoardIDです。
+	str string          // str はuuid.UUIDを文字列に変換したものです。
 }
 
 // NewBulletinBoardID はBulletinBoardのIDを生成します。
@@ -29,14 +29,17 @@ func NewBulletinBoardID(ID string) (BulletinBoardID, error) {
 	return bbid, nil
 }
 
+// Get は自分自身を返却します。
 func (bb BulletinBoardID) Get() BulletinBoardID {
 	return bb
 }
 
+// String はBulletinBoardIDが文字列に変換されたものを返却します。
 func (bb BulletinBoardID) String() string {
 	return bb.str
 }
 
+// Equals は自分自身と引数に渡された値オブジェクトが同一のものか判定します。
 func (bb BulletinBoardID) Equals(id BulletinBoardID) bool {
 	if (bb.Get() == id.Get()) && (bb.String() == id.String()) {
 		return true

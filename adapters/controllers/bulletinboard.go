@@ -14,18 +14,23 @@ import (
 // BulletinBoardController はBulletinBoardRepositorerのコントローラーです。
 // 初期化時に渡すリポジトリ以外を利用したい場合はそれぞれメソッドの引数で受け取ってください。
 type BulletinBoardController struct {
+	// Repository はBulletinBoardRepositorerを満たしたリポジトリです。
+	// このコントローラーで利用するメインのリポジトリです。
 	Repository usecases.BulletinBoardRepositorer
 }
 
-type PostBulletinBoard struct {
-	ID    string
-	Title string `validate:"required,min=1,max=50"`
+// BulletinBoard はリクエストされてきたPost値を受け取る為のStructです。
+type BulletinBoard struct {
+	ID    string // ID はBulletinBoardのIDです。
+	Title string `validate:"required,min=1,max=50"` // Title はBulletinBoardのTitleです。
 }
 
+// NewBulletinBoardController はBulletinBoardControllerを初期化します。
 func NewBulletinBoardController(r usecases.BulletinBoardRepositorer) *BulletinBoardController {
 	return &BulletinBoardController{Repository: r}
 }
 
+// GetBulletinBoardByID はBulletinBoardIDからBulletinBoardを取得します。
 func (bbc *BulletinBoardController) GetBulletinBoardByID(ID string) (*entities.BulletinBoard, error) {
 	bbu := usecases.NewBulletinBoardUsecase(bbc.Repository)
 
@@ -38,9 +43,10 @@ func (bbc *BulletinBoardController) GetBulletinBoardByID(ID string) (*entities.B
 	return bbu.GetBulletinBoardByID(bbid, tr)
 }
 
-// コマンド・クエリの原則からは外れるがAPIのレスポンスに登録したデータを返却するためにエンティティを返す
+// AddBulletinBoard はPostされてきたデータを元にBulletinBoardを追加します。
+// コマンド・クエリの原則からは外れますがAPIのレスポンスに登録したデータを返却するためにエンティティを返します。
 func (bbc *BulletinBoardController) AddBulletinBoard(c *gin.Context) (*entities.BulletinBoard, error) {
-	pb := PostBulletinBoard{}
+	pb := BulletinBoard{}
 	err := c.BindJSON(&pb)
 	if err != nil {
 		return nil, errorobjects.NewParameterBindingError(err)
@@ -61,11 +67,13 @@ func (bbc *BulletinBoardController) AddBulletinBoard(c *gin.Context) (*entities.
 	return &bb, bbu.AddBulletinBoard(bb)
 }
 
+// ListBulletinBoard はBulletinBoardの一覧を取得します。
 func (bbc *BulletinBoardController) ListBulletinBoard() ([]*entities.BulletinBoard, error) {
 	bbu := usecases.NewBulletinBoardUsecase(bbc.Repository)
 	return bbu.ListBulletinBoard()
 }
 
-func convertIDToBulletinBoardID(ID string) (entities.BulletinBoardID, error) {
+// convertIDToBulletinBoardID は文字列のBulletinBoardIDをentities.BulletinBoardIDに変換します。
+func convertIDToBulletinBoardID(ID string) (valueobjects.BulletinBoardID, error) {
 	return valueobjects.NewBulletinBoardID(ID)
 }

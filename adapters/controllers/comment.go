@@ -11,21 +11,28 @@ import (
 	"github.com/go-playground/validator"
 )
 
+// CommentController はCommentRepositorerのコントローラーです。
+// 初期化時に渡すリポジトリ以外を利用したい場合はそれぞれメソッドの引数で受け取ってください。
 type CommentController struct {
+	// Repository はこのコントローラーで利用するメインのリポジトリです。
+	// このコントローラーで利用するメインのリポジトリです。
 	Repository usecases.CommentRepositorer
 }
 
+// Comment はリクエストされてきたPost値を受け取る為のStructです。
 type Comment struct {
-	ID       string
-	ThreadID string `validate:"required"`
-	Text     string `validate:"required,min=1,max=2048"`
+	ID       string // ID はCommentのIDです。
+	ThreadID string `validate:"required"`                // ThreadID はThreadのIDです。
+	Text     string `validate:"required,min=1,max=2048"` // Text はユーザーが入力した文字列です。
 }
 
+// NewCommentController はCommentControllerを初期化します。
 func NewCommentController(r usecases.CommentRepositorer) *CommentController {
 	return &CommentController{Repository: r}
 }
 
-// コマンド・クエリの原則からは外れるがAPIのレスポンスに登録したデータを返却するためにエンティティを返す
+// AddComment はPostされてきたデータを元にCommentを追加します。
+// コマンド・クエリの原則からは外れますがAPIのレスポンスに登録したデータを返却するためにエンティティを返します。
 func (cc *CommentController) AddComment(c *gin.Context) (*entities.Comment, error) {
 	pc := Comment{}
 	err := c.BindJSON(&pc)
@@ -60,11 +67,13 @@ func (cc *CommentController) AddComment(c *gin.Context) (*entities.Comment, erro
 	return &cm, cu.AddComment(cm, gateways.GetInMemoryRepositoryInstance())
 }
 
+// ListComment はCommentの一覧を取得します。
 func (cc *CommentController) ListComment() ([]*entities.Comment, error) {
 	tu := usecases.NewCommentUsecase(cc.Repository)
 	return tu.ListComment()
 }
 
+// ListCommentByThreadID は指定されたThreadIDを持つComment一覧を取得します。
 func (cc *CommentController) ListCommentByThreadID(tID string) ([]*entities.Comment, error) {
 	tid, err := convertIDToThreadID(tID)
 	if err != nil {
@@ -74,10 +83,12 @@ func (cc *CommentController) ListCommentByThreadID(tID string) ([]*entities.Comm
 	return tu.ListCommentByThreadID(tid)
 }
 
-func convertIDToCommentID(ID string) (entities.CommentID, error) {
+// convertIDToCommentID は文字列のCommentIDをentities.CommentIDに変換します。
+func convertIDToCommentID(ID string) (valueobjects.CommentID, error) {
 	return valueobjects.NewCommentID(ID)
 }
 
-func convertCreatAtToCommentTime(unixTime int64) (entities.CommentTime, error) {
+// convertCreatAtToCommentTime は渡された数値をentities.CommentTimeに変換します。
+func convertCreatAtToCommentTime(unixTime int64) (valueobjects.CommentTime, error) {
 	return valueobjects.NewCommentTime(unixTime)
 }

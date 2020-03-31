@@ -5,23 +5,23 @@ import (
 	"vspro/entities"
 )
 
+// ThreadPresenter はentities.Threadを外部へ渡す為にデータの変換を行います。
 type ThreadPresenter struct{}
 
+// NewThreadPresenter はThreadPresenterを初期化します。
 func NewThreadPresenter() *ThreadPresenter {
 	return &ThreadPresenter{}
 }
 
+// Thread はentitiesを外部へ渡す際に利用するStructです。
 type Thread struct {
-	ID              string
-	BulletinBoardID string
-	Title           string
-	Comments        []*Comment
+	ID              string     // ID はThreadのIDです。
+	BulletinBoardID string     // BulletinBoardID はBulletinBoardのIDです。
+	Title           string     // Title はThreadのTitleです。
+	Comments        []*Comment // Comments はCommentの一覧です。
 }
 
-func (tp *ThreadPresenter) ConvertToHttpErrorResponse(httpStatusCode int, err error) *HTTPResponse {
-	return newHTTPErrorResponse(httpStatusCode, http.StatusText(httpStatusCode), err)
-}
-
+// ConvertToHttpThreadListResponse はThread一覧のレスポンスを返却します。
 func (tp *ThreadPresenter) ConvertToHttpThreadListResponse(tl []*entities.Thread) *HTTPResponse {
 	res := make([]*Thread, 0)
 	for _, t := range tl {
@@ -32,6 +32,7 @@ func (tp *ThreadPresenter) ConvertToHttpThreadListResponse(tl []*entities.Thread
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
+// ConvertToHttpBulletinBoardResponse はCommentを含むThreadのレスポンスを返却します。
 func (tp *ThreadPresenter) ConvertToHttpThreadResponse(t *entities.Thread) *HTTPResponse {
 	res := make([]*Thread, 0)
 	pt := convertEntitiesThreadToThread(t)
@@ -42,6 +43,7 @@ func (tp *ThreadPresenter) ConvertToHttpThreadResponse(t *entities.Thread) *HTTP
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
+// convertEntitiesThreadToThread はentities.ThreadからHTTPレスポンス用のStructを返却します。
 func convertEntitiesThreadToThread(t *entities.Thread) *Thread {
 	pt := Thread{
 		ID:              t.ID.String(),

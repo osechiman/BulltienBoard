@@ -195,16 +195,16 @@ func responseByError(c *gin.Context, err error) {
 		switch t := err.(type) {
 		case *errorobjects.NotFoundError:
 			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
-			logger.Debug(c, t.Error())
+			logger.GetLoggerColumns(c).Debug(c, t.Error())
 		case *errorobjects.MissingRequiredFieldsError:
 			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
-			logger.Warn(c, t.Error())
+			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.ParameterBindingError:
 			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
-			logger.Warn(c, t.Error())
+			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		default:
 			c.JSON(http.StatusInternalServerError, ep.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
-			logger.Error(c, t.Error())
+			logger.GetLoggerColumns(c).Error(c, t.Error())
 		}
 	}
 }

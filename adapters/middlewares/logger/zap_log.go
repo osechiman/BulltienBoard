@@ -50,7 +50,7 @@ func init() {
 
 // Error は予期しないその他の実行時エラーが発生した場合に利用します。
 func (lc *LogColumns) Error(c *gin.Context, msg interface{}) {
-	l := getLoggerColumns(c)
+	l := GetLoggerColumns(c)
 	zapLogger.Error(fmt.Sprint(msg),
 		zap.String("processID", l.PID),
 		zap.String("user-agent", l.UA),
@@ -61,7 +61,7 @@ func (lc *LogColumns) Error(c *gin.Context, msg interface{}) {
 
 // Info は実行時の何らかの注目すべき事象を記録したい場合に利用します。（開始や終了など）
 func (lc *LogColumns) Info(c *gin.Context, msg interface{}) {
-	l := getLoggerColumns(c)
+	l := GetLoggerColumns(c)
 	zapLogger.Info(fmt.Sprint(msg),
 		zap.String("processID", l.PID),
 		zap.String("user-agent", l.UA),
@@ -73,7 +73,7 @@ func (lc *LogColumns) Info(c *gin.Context, msg interface{}) {
 // Debug はシステムの動作状況に関する詳細な情報を記録したい場合に利用します。
 // 暗黙的に本番環境ではこの処理は無視される事を期待しています。
 func (lc *LogColumns) Debug(c *gin.Context, msg interface{}) {
-	l := getLoggerColumns(c)
+	l := GetLoggerColumns(c)
 	zapLogger.Debug(fmt.Sprint(msg),
 		zap.String("processID", l.PID),
 		zap.String("user-agent", l.UA),
@@ -85,7 +85,7 @@ func (lc *LogColumns) Debug(c *gin.Context, msg interface{}) {
 // Warn は廃要素となったAPIの使用、APIの不適切な使用、エラーに近い事象などを記録したい場合に利用します。
 // 例えば実行時に生じた異常とは言い切れないが正常とも異なる何らかの予期しない問題が発生した場合などです。
 func (lc *LogColumns) Warn(c *gin.Context, msg interface{}) {
-	l := getLoggerColumns(c)
+	l := GetLoggerColumns(c)
 	zapLogger.Warn(fmt.Sprint(msg),
 		zap.String("processID", l.PID),
 		zap.String("user-agent", l.UA),
@@ -105,8 +105,8 @@ func NewZapLogger(c *gin.Context) *LogColumns {
 	return l
 }
 
-// getLoggerColumns はコンテキストからLogColumnsを取得します。取得出来ない場合は生成して返却します。
-func getLoggerColumns(c *gin.Context) *LogColumns {
+// GetLoggerColumns はコンテキストからLogColumnsを取得します。取得出来ない場合は生成して返却します。
+func GetLoggerColumns(c *gin.Context) *LogColumns {
 	lm, exits := c.Get("Logger")
 	if exits {
 		return lm.(*LogColumns)

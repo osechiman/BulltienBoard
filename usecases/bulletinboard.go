@@ -3,17 +3,21 @@ package usecases
 import (
 	"vspro/entities"
 	"vspro/entities/errorobjects"
+	"vspro/entities/valueobjects"
 )
 
+// BulletinBoardUsecase はBulletinBoardに対するUsecaseを定義するものです。
 type BulletinBoardUsecase struct {
-	Repository BulletinBoardRepositorer
+	Repository BulletinBoardRepositorer // Repository は外部データソースに存在するentities.BulletinBoardを操作する際に利用するインターフェースです。
 }
 
+// NewBulletinBoardUsecase はBulletinBoardUsecaseを初期化します。
 func NewBulletinBoardUsecase(r BulletinBoardRepositorer) *BulletinBoardUsecase {
 	return &BulletinBoardUsecase{Repository: r}
 }
 
-func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID entities.BulletinBoardID, threadRepository ThreadRepositorer) (*entities.BulletinBoard, error) {
+// GetBulletinBoardByID は指定されたvalueobjects.BulletinBoardIDを持つentities.BulletinBoardを取得します。
+func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBoardID, threadRepository ThreadRepositorer) (*entities.BulletinBoard, error) {
 	tl, err := threadRepository.ListThreadByBulletinBoardID(ID)
 	if err != nil {
 		switch err.(type) {
@@ -33,10 +37,12 @@ func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID entities.BulletinBoardI
 	return b, nil
 }
 
+// AddBulletinBoard はentities.BulletinBoardを追加します。
 func (bbu *BulletinBoardUsecase) AddBulletinBoard(q entities.BulletinBoard) error {
 	return bbu.Repository.AddBulletinBoard(q)
 }
 
+// ListBulletinBoard はentities.BulletinBoardの一覧を取得します。
 func (bbu *BulletinBoardUsecase) ListBulletinBoard() ([]*entities.BulletinBoard, error) {
 	return bbu.Repository.ListBulletinBoard()
 }

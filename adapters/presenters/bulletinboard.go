@@ -5,24 +5,22 @@ import (
 	"vspro/entities"
 )
 
+// BulletinBoardPresenter はentities.BulletinBoardを外部へ渡す為にデータの変換を行います。
 type BulletinBoardPresenter struct{}
 
+// NewBulletinBoardPresenter はBulletinBoardPresenterを初期化します。
 func NewBulletinBoardPresenter() *BulletinBoardPresenter {
 	return &BulletinBoardPresenter{}
 }
 
-type BulletinBoards []*BulletinBoard
-
+// BulletinBoard はentitiesを外部へ渡す際に利用するStructです。
 type BulletinBoard struct {
-	ID      string
-	Title   string
-	Threads []*Thread
+	ID      string    // ID はBulletinBoardのIDです。
+	Title   string    // Title はBulletinBoardのTitleです。
+	Threads []*Thread // Threads はThreadの一覧です。
 }
 
-func (bbp *BulletinBoardPresenter) ConvertToHttpErrorResponse(httpStatusCode int, err error) *HTTPResponse {
-	return newHTTPErrorResponse(httpStatusCode, http.StatusText(httpStatusCode), err)
-}
-
+// ConvertToHttpBulletinBoardListResponse はBulletinBoard一覧のレスポンスを返却します。
 func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardListResponse(bbl []*entities.BulletinBoard) *HTTPResponse {
 	res := make([]*BulletinBoard, 0)
 	for _, bb := range bbl {
@@ -33,6 +31,7 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardListResponse(bbl []
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
+// ConvertToHttpBulletinBoardResponse はThreadを含むBulletinBoardのレスポンスを返却します。
 func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardResponse(bb *entities.BulletinBoard) *HTTPResponse {
 	res := make([]*BulletinBoard, 0)
 	pbb := convertEntitiesBulletinBoardToBulletinBoard(bb)
@@ -40,6 +39,7 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardResponse(bb *entiti
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
+// convertEntitiesBulletinBoardToBulletinBoard はentities.BulletinBoardからHTTPレスポンス用のStructを返却します。
 func convertEntitiesBulletinBoardToBulletinBoard(bb *entities.BulletinBoard) *BulletinBoard {
 	pbb := BulletinBoard{
 		ID:    bb.ID.String(),
