@@ -14,7 +14,7 @@ func NewCommentTime(unixTime int64) (CommentTime, error) {
 	ct := CommentTime{
 		unixTime: unixTime,
 	}
-	if unixTime == 0 {
+	if unixTime < 0 {
 		ct.unixTime = time.Now().Unix()
 	}
 	return ct, nil

@@ -56,7 +56,7 @@ func (cc *CommentController) AddComment(c *gin.Context) (*entities.Comment, erro
 		return nil, err
 	}
 
-	ct, err := valueobjects.NewCommentTime(0)
+	ct, err := valueobjects.NewCommentTime(-1)
 	if err != nil {
 		return nil, err
 	}

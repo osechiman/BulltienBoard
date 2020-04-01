@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestInternalServerError_Error(t *testing.T) {
+func TestMissingRequiredFieldsError_Error(t *testing.T) {
 	type fields struct {
 		msg            string
 		code           int
@@ -20,52 +20,52 @@ func TestInternalServerError_Error(t *testing.T) {
 		{
 			name: "msgの値とdefaultのエラーメッセージが結合されて出力されてくる",
 			fields: fields{
-				msg:            "internal server error object test",
-				code:           ErrorCodeInternalServerError,
-				HTTPStatusCode: http.StatusInternalServerError,
+				msg:            "missing required field error object test",
+				code:           ErrorCodeMissingRequiredFiled,
+				HTTPStatusCode: http.StatusBadRequest,
 			},
-			want: "internal server error object test. error code is 0",
+			want: "missing required field error object test. error code is 2",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ise := &InternalServerError{
+			mrfe := &MissingRequiredFieldsError{
 				msg:            tt.fields.msg,
 				code:           tt.fields.code,
 				HTTPStatusCode: tt.fields.HTTPStatusCode,
 			}
-			if got := ise.Error(); got != tt.want {
+			if got := mrfe.Error(); got != tt.want {
 				t.Errorf("Error() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestNewInternalServerError(t *testing.T) {
+func TestNewMissingRequiredFieldsError(t *testing.T) {
 	type args struct {
 		msg interface{}
 	}
 	tests := []struct {
 		name string
 		args args
-		want *InternalServerError
+		want *MissingRequiredFieldsError
 	}{
 		{
 			name: "エラーオブジェクトが正常に生成される",
 			args: args{
-				msg: "internal server error object test",
+				msg: "missing required field error object test",
 			},
-			want: &InternalServerError{
-				msg:            "internal server error object test",
-				code:           ErrorCodeInternalServerError,
-				HTTPStatusCode: http.StatusInternalServerError,
+			want: &MissingRequiredFieldsError{
+				msg:            "missing required field error object test",
+				code:           ErrorCodeMissingRequiredFiled,
+				HTTPStatusCode: http.StatusBadRequest,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewInternalServerError(tt.args.msg); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewInternalServerError() = %v, want %v", got, tt.want)
+			if got := NewMissingRequiredFieldsError(tt.args.msg); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewMissingRequiredFieldsError() = %v, want %v", got, tt.want)
 			}
 		})
 	}

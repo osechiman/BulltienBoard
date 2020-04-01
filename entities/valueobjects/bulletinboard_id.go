@@ -40,8 +40,8 @@ func (bb BulletinBoardID) String() string {
 }
 
 // Equals は自分自身と引数に渡された値オブジェクトが同一のものか判定します。
-func (bb BulletinBoardID) Equals(id BulletinBoardID) bool {
-	if (bb.Get() == id.Get()) && (bb.String() == id.String()) {
+func (bb BulletinBoardID) Equals(other BulletinBoardID) bool {
+	if (bb.Get() == other.Get()) && (bb.String() == other.String()) {
 		return true
 	}
 	return false
