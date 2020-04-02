@@ -1,7 +1,6 @@
 package errorobjects
 
 import (
-	"net/http"
 	"reflect"
 	"testing"
 )
@@ -21,9 +20,8 @@ func TestNewNotFoundError(t *testing.T) {
 				msg: "not found error object test",
 			},
 			want: &NotFoundError{
-				msg:            "not found error object test",
-				code:           ErrorCodeNotFound,
-				HTTPStatusCode: http.StatusNotFound,
+				msg:  "not found error object test",
+				code: ErrorCodeNotFound,
 			},
 		},
 	}
@@ -38,9 +36,8 @@ func TestNewNotFoundError(t *testing.T) {
 
 func TestNotFoundError_Error(t *testing.T) {
 	type fields struct {
-		msg            string
-		code           int
-		HTTPStatusCode int
+		msg  string
+		code int
 	}
 	tests := []struct {
 		name   string
@@ -50,9 +47,8 @@ func TestNotFoundError_Error(t *testing.T) {
 		{
 			name: "msgの値とdefaultのエラーメッセージが結合されて出力されてくる",
 			fields: fields{
-				msg:            "not found error object test",
-				code:           ErrorCodeNotFound,
-				HTTPStatusCode: http.StatusNotFound,
+				msg:  "not found error object test",
+				code: ErrorCodeNotFound,
 			},
 			want: "not found error object test not found. error code is 1",
 		},
@@ -60,9 +56,8 @@ func TestNotFoundError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			nfe := &NotFoundError{
-				msg:            tt.fields.msg,
-				code:           tt.fields.code,
-				HTTPStatusCode: tt.fields.HTTPStatusCode,
+				msg:  tt.fields.msg,
+				code: tt.fields.code,
 			}
 			if got := nfe.Error(); got != tt.want {
 				t.Errorf("Error() = %v, want %v", got, tt.want)

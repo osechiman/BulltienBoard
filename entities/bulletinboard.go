@@ -1,24 +1,36 @@
 package entities
 
 import (
+	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
+
+	"github.com/go-playground/validator"
 )
 
 // BulletinBoard はBulletinBoardのエンティティです。
 type BulletinBoard struct {
-	ID      BulletinBoardID // ID はBulletinBoardIDインターフェースです。
-	Title   string          // Title はBulletinBoardのTitleです。
-	Threads []*Thread       // Thread はThreadの一覧です。
+	ID      BulletinBoardIDer // ID はBulletinBoardIDインターフェースです。
+	Title   string            `validate:"required,min=1,max=50"` // Title はBulletinBoardのTitleです。
+	Threads []*Thread         // Thread はThreadの一覧です。
 }
 
 // NewBulletinBoard はBulletinBoardを初期化します。
-func NewBulletinBoard(ID BulletinBoardID, title string) BulletinBoard {
-	return BulletinBoard{ID: ID, Title: title}
+func NewBulletinBoard(ID BulletinBoardIDer, title string) (BulletinBoard, error) {
+	bb := BulletinBoard{
+		ID:    ID,
+		Title: title,
+	}
+	validate := validator.New()
+	err := validate.Struct(bb)
+	if err != nil {
+		return BulletinBoard{}, errorobjects.NewParameterBindingError(err.Error())
+	}
+	return BulletinBoard{ID: ID, Title: title}, nil
 }
 
-// BulletinBoardID はBulletinBoardエンティティに実装されるインターフェースを定義しています。
+// BulletinBoardIDer はBulletinBoardエンティティに実装されるインターフェースを定義しています。
 // valueobjectsはこのインターフェースを満たす様に実装する必要があります。
-type BulletinBoardID interface {
+type BulletinBoardIDer interface {
 	// Get は自分自身を返却します。
 	Get() valueobjects.BulletinBoardID
 	// String はBulletinBoardIDが文字列に変換されたものを返却します。

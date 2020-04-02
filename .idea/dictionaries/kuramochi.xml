@@ -3,12 +3,14 @@
     <words>
       <w>bbid</w>
       <w>configer</w>
+      <w>csve</w>
       <w>envconfig</w>
       <w>errorobjects</w>
       <w>mrfe</w>
       <w>repositorer</w>
       <w>usecase</w>
       <w>usecases</w>
+      <w>valueobjects</w>
     </words>
   </dictionary>
 </component>

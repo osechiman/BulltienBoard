@@ -16,7 +16,7 @@ func NewThreadPresenter() *ThreadPresenter {
 // Thread はentitiesを外部へ渡す際に利用するStructです。
 type Thread struct {
 	ID              string     // ID はThreadのIDです。
-	BulletinBoardID string     // BulletinBoardID はBulletinBoardのIDです。
+	BulletinBoardID string     // BulletinBoardIDer はBulletinBoardのIDです。
 	Title           string     // Title はThreadのTitleです。
 	Comments        []*Comment // Comments はCommentの一覧です。
 }

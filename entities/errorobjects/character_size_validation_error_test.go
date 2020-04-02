@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestMissingRequiredFieldsError_Error(t *testing.T) {
+func TestCharacterSizeValidationError_Error(t *testing.T) {
 	type fields struct {
 		msg  string
 		code int
@@ -18,49 +18,49 @@ func TestMissingRequiredFieldsError_Error(t *testing.T) {
 		{
 			name: "msgの値とdefaultのエラーメッセージが結合されて出力されてくる",
 			fields: fields{
-				msg:  "missing required field error object test",
-				code: ErrorCodeMissingRequiredFiled,
+				msg:  "character size validation error object test",
+				code: ErrorCodeCharacterSizeValidation,
 			},
-			want: "missing required field error object test. error code is 2",
+			want: "character size validation error object test. error code is 4",
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mrfe := &MissingRequiredFieldsError{
+			ise := &CharacterSizeValidationError{
 				msg:  tt.fields.msg,
 				code: tt.fields.code,
 			}
-			if got := mrfe.Error(); got != tt.want {
+			if got := ise.Error(); got != tt.want {
 				t.Errorf("Error() = %v, want %v", got, tt.want)
 			}
 		})
 	}
 }
 
-func TestNewMissingRequiredFieldsError(t *testing.T) {
+func TestNewCharacterSizeValidationError(t *testing.T) {
 	type args struct {
 		msg interface{}
 	}
 	tests := []struct {
 		name string
 		args args
-		want *MissingRequiredFieldsError
+		want *CharacterSizeValidationError
 	}{
 		{
 			name: "エラーオブジェクトが正常に生成される",
 			args: args{
-				msg: "missing required field error object test",
+				msg: "character size validation error object test",
 			},
-			want: &MissingRequiredFieldsError{
-				msg:  "missing required field error object test",
-				code: ErrorCodeMissingRequiredFiled,
+			want: &CharacterSizeValidationError{
+				msg:  "character size validation error object test",
+				code: ErrorCodeCharacterSizeValidation,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewMissingRequiredFieldsError(tt.args.msg); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewMissingRequiredFieldsError() = %v, want %v", got, tt.want)
+			if got := NewCharacterSizeValidationError(tt.args.msg); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewCharacterSizeValidationError() = %v, want %v", got, tt.want)
 			}
 		})
 	}

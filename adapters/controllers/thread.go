@@ -22,7 +22,7 @@ type ThreadController struct {
 // Thread はリクエストされてきたPost値を受け取る為のStructです。
 type Thread struct {
 	ID              string // ID はThreadのIDです。
-	BulletinBoardID string `validate:"required"`              // BulletinBoardID はBulletinBoardのIDです。
+	BulletinBoardID string `validate:"required"`              // BulletinBoardIDer はBulletinBoardのIDです。
 	Title           string `validate:"required,min=1,max=50"` // Title はユーザーが入力した文字列です。
 }
 
@@ -68,7 +68,11 @@ func (tc *ThreadController) AddThread(c *gin.Context) (*entities.Thread, error) 
 	if err != nil {
 		return nil, err
 	}
-	t := entities.NewThread(tid.Get(), bid, pt.Title)
+
+	t, err := entities.NewThread(tid.Get(), bid, pt.Title)
+	if err != nil {
+		return nil, err
+	}
 
 	tu := usecases.NewThreadUsecase(tc.Repository)
 	return &t, tu.AddThread(t, gateways.GetInMemoryRepositoryInstance())

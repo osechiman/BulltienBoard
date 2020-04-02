@@ -2,19 +2,17 @@ package errorobjects
 
 import (
 	"fmt"
-	"net/http"
 )
 
 // ParameterBindingError はリクエストパラメータをStructにバインドしようとした結果失敗した場合に生成するErrorオブジェクトです。
 type ParameterBindingError struct {
-	msg            string // msg はError()を呼び出した際に文字列の先頭に結合される文字列です。
-	code           int    // code はerror_codeを参照して設定します。
-	HTTPStatusCode int    // HTTPStatusCode はHTTPレスポンス時に設定したいレスポンスコードです。
+	msg  string // msg はError()を呼び出した際に文字列の先頭に結合される文字列です。
+	code int    // code はerror_codeを参照して設定します。
 }
 
 // NewParameterBindingError はParameterBindingErrorオブジェクトを生成します。
 func NewParameterBindingError(msg interface{}) *ParameterBindingError {
-	return &ParameterBindingError{msg: fmt.Sprint(msg), code: ErrorCodeParameterBinding, HTTPStatusCode: http.StatusBadRequest}
+	return &ParameterBindingError{msg: fmt.Sprint(msg), code: ErrorCodeParameterBinding}
 }
 
 // Error はエラーメッセージを文字列で返却します。

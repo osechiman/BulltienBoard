@@ -1,16 +1,14 @@
 package errorobjects
 
 import (
-	"net/http"
 	"reflect"
 	"testing"
 )
 
 func TestInternalServerError_Error(t *testing.T) {
 	type fields struct {
-		msg            string
-		code           int
-		HTTPStatusCode int
+		msg  string
+		code int
 	}
 	tests := []struct {
 		name   string
@@ -20,9 +18,8 @@ func TestInternalServerError_Error(t *testing.T) {
 		{
 			name: "msgの値とdefaultのエラーメッセージが結合されて出力されてくる",
 			fields: fields{
-				msg:            "internal server error object test",
-				code:           ErrorCodeInternalServerError,
-				HTTPStatusCode: http.StatusInternalServerError,
+				msg:  "internal server error object test",
+				code: ErrorCodeInternalServerError,
 			},
 			want: "internal server error object test. error code is 0",
 		},
@@ -30,9 +27,8 @@ func TestInternalServerError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			ise := &InternalServerError{
-				msg:            tt.fields.msg,
-				code:           tt.fields.code,
-				HTTPStatusCode: tt.fields.HTTPStatusCode,
+				msg:  tt.fields.msg,
+				code: tt.fields.code,
 			}
 			if got := ise.Error(); got != tt.want {
 				t.Errorf("Error() = %v, want %v", got, tt.want)
@@ -56,9 +52,8 @@ func TestNewInternalServerError(t *testing.T) {
 				msg: "internal server error object test",
 			},
 			want: &InternalServerError{
-				msg:            "internal server error object test",
-				code:           ErrorCodeInternalServerError,
-				HTTPStatusCode: http.StatusInternalServerError,
+				msg:  "internal server error object test",
+				code: ErrorCodeInternalServerError,
 			},
 		},
 	}

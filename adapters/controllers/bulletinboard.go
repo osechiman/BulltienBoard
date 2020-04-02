@@ -22,7 +22,7 @@ type BulletinBoardController struct {
 // BulletinBoard はリクエストされてきたPost値を受け取る為のStructです。
 type BulletinBoard struct {
 	ID    string // ID はBulletinBoardのIDです。
-	Title string `validate:"required,min=1,max=50"` // Title はBulletinBoardのTitleです。
+	Title string `validate:"required"` // Title はBulletinBoardのTitleです。
 }
 
 // NewBulletinBoardController はBulletinBoardControllerを初期化します。
@@ -61,7 +61,11 @@ func (bbc *BulletinBoardController) AddBulletinBoard(c *gin.Context) (*entities.
 	if err != nil {
 		return nil, err
 	}
-	bb := entities.NewBulletinBoard(bbid, pb.Title)
+
+	bb, err := entities.NewBulletinBoard(bbid, pb.Title)
+	if err != nil {
+		return nil, err
+	}
 
 	bbu := usecases.NewBulletinBoardUsecase(bbc.Repository)
 	return &bb, bbu.AddBulletinBoard(bb)

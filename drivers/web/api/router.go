@@ -62,13 +62,16 @@ func responseByError(c *gin.Context, err error) {
 	if err != nil {
 		switch t := err.(type) {
 		case *errorobjects.NotFoundError:
-			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
+			c.JSON(http.StatusNotFound, ep.ConvertToHttpErrorResponse(http.StatusNotFound, t))
 			logger.GetLoggerColumns(c).Debug(c, t.Error())
 		case *errorobjects.MissingRequiredFieldsError:
-			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
+			c.JSON(http.StatusBadRequest, ep.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.ParameterBindingError:
-			c.JSON(t.HTTPStatusCode, ep.ConvertToHttpErrorResponse(t.HTTPStatusCode, t))
+			c.JSON(http.StatusBadRequest, ep.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
+			logger.GetLoggerColumns(c).Warn(c, t.Error())
+		case *errorobjects.CharacterSizeValidationError:
+			c.JSON(http.StatusBadRequest, ep.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		default:
 			c.JSON(http.StatusInternalServerError, ep.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))

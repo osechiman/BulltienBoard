@@ -1,7 +1,6 @@
 package errorobjects
 
 import (
-	"net/http"
 	"reflect"
 	"testing"
 )
@@ -21,9 +20,8 @@ func TestNewParameterBindingError(t *testing.T) {
 				msg: "parameter binding error object test",
 			},
 			want: &ParameterBindingError{
-				msg:            "parameter binding error object test",
-				code:           ErrorCodeParameterBinding,
-				HTTPStatusCode: http.StatusBadRequest,
+				msg:  "parameter binding error object test",
+				code: ErrorCodeParameterBinding,
 			},
 		},
 	}
@@ -38,9 +36,8 @@ func TestNewParameterBindingError(t *testing.T) {
 
 func TestParameterBindingError_Error(t *testing.T) {
 	type fields struct {
-		msg            string
-		code           int
-		HTTPStatusCode int
+		msg  string
+		code int
 	}
 	tests := []struct {
 		name   string
@@ -50,9 +47,8 @@ func TestParameterBindingError_Error(t *testing.T) {
 		{
 			name: "msgの値とdefaultのエラーメッセージが結合されて出力されてくる",
 			fields: fields{
-				msg:            "parameter binding error object test",
-				code:           ErrorCodeParameterBinding,
-				HTTPStatusCode: http.StatusBadRequest,
+				msg:  "parameter binding error object test",
+				code: ErrorCodeParameterBinding,
 			},
 			want: "parameter binding error object test. error code is 3",
 		},
@@ -60,9 +56,8 @@ func TestParameterBindingError_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			pbe := &ParameterBindingError{
-				msg:            tt.fields.msg,
-				code:           tt.fields.code,
-				HTTPStatusCode: tt.fields.HTTPStatusCode,
+				msg:  tt.fields.msg,
+				code: tt.fields.code,
 			}
 			if got := pbe.Error(); got != tt.want {
 				t.Errorf("Error() = %v, want %v", got, tt.want)

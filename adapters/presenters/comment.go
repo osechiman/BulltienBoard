@@ -16,7 +16,7 @@ func NewCommentPresenter() *CommentPresenter {
 // Comment はentitiesを外部へ渡す際に利用するStructです。
 type Comment struct {
 	ID       string // ID はCommentのIDです。
-	ThreadID string // ThreadID はThreadのIDです。
+	ThreadID string // ThreadIDer はThreadのIDです。
 	Text     string // Text はCommentの内容です。
 	CreatAt  int64  // CreatAt はCommentが登録された時間をunixTimeです。
 }

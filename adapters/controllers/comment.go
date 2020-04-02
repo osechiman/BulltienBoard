@@ -22,8 +22,8 @@ type CommentController struct {
 // Comment はリクエストされてきたPost値を受け取る為のStructです。
 type Comment struct {
 	ID       string // ID はCommentのIDです。
-	ThreadID string `validate:"required"`                // ThreadID はThreadのIDです。
-	Text     string `validate:"required,min=1,max=2048"` // Text はユーザーが入力した文字列です。
+	ThreadID string `validate:"required"` // ThreadIDer はThreadのIDです。
+	Text     string `validate:"required"` // Text はユーザーが入力した文字列です。
 }
 
 // NewCommentController はCommentControllerを初期化します。
@@ -61,7 +61,10 @@ func (cc *CommentController) AddComment(c *gin.Context) (*entities.Comment, erro
 		return nil, err
 	}
 
-	cm := entities.NewComment(cid, tid, pc.Text, ct)
+	cm, err := entities.NewComment(cid, tid, pc.Text, ct)
+	if err != nil {
+		return nil, err
+	}
 
 	cu := usecases.NewCommentUsecase(cc.Repository)
 	return &cm, cu.AddComment(cm, gateways.GetInMemoryRepositoryInstance())
