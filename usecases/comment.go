@@ -25,11 +25,11 @@ func (cc *CommentUsecase) AddComment(c entities.Comment, threadRepository Thread
 }
 
 // ListComment はentities.Commentの一覧を取得します。
-func (cc *CommentUsecase) ListComment() ([]*entities.Comment, error) {
+func (cc *CommentUsecase) ListComment() ([]entities.Comment, error) {
 	return cc.Repository.ListComment()
 }
 
 // ListCommentByThreadID は指定されたvalueobjects.ThreadIDを持つentities.Commentの一覧を取得します。
-func (cc *CommentUsecase) ListCommentByThreadID(tID valueobjects.ThreadID) ([]*entities.Comment, error) {
+func (cc *CommentUsecase) ListCommentByThreadID(tID valueobjects.ThreadID) ([]entities.Comment, error) {
 	return cc.Repository.ListCommentByThreadID(tID)
 }

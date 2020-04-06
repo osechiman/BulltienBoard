@@ -22,8 +22,8 @@ type Comment struct {
 }
 
 // ConvertToHttpCommentListResponse はComment一覧のレスポンスを返却します。
-func (cp *CommentPresenter) ConvertToHttpCommentListResponse(cl []*entities.Comment) *HTTPResponse {
-	res := make([]*Comment, 0)
+func (cp *CommentPresenter) ConvertToHttpCommentListResponse(cl []entities.Comment) *HTTPResponse {
+	res := make([]Comment, 0)
 	for _, c := range cl {
 		res = append(res, convertEntitiesCommentToComment(c))
 	}
@@ -31,20 +31,20 @@ func (cp *CommentPresenter) ConvertToHttpCommentListResponse(cl []*entities.Comm
 }
 
 // ConvertToHttpCommentResponse はCommentのレスポンスを返却します。
-func (cp *CommentPresenter) ConvertToHttpCommentResponse(c *entities.Comment) *HTTPResponse {
-	res := make([]*Comment, 0)
+func (cp *CommentPresenter) ConvertToHttpCommentResponse(c entities.Comment) *HTTPResponse {
+	res := make([]Comment, 0)
 	pc := convertEntitiesCommentToComment(c)
 	res = append(res, pc)
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
 // convertEntitiesCommentToComment はentities.CommentからHTTPレスポンス用のStructを返却します。
-func convertEntitiesCommentToComment(c *entities.Comment) *Comment {
+func convertEntitiesCommentToComment(c entities.Comment) Comment {
 	pc := Comment{
 		ID:       c.ID.String(),
 		ThreadID: c.ThreadID.String(),
 		Text:     c.Text,
 		CreatAt:  c.CreateAt.ToUnixTime(),
 	}
-	return &pc
+	return pc
 }

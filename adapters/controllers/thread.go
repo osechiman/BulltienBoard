@@ -32,12 +32,12 @@ func NewThreadController(r usecases.ThreadRepositorer) *ThreadController {
 }
 
 // GetThreadByID はThreadIDからThreadを取得します。
-func (tc *ThreadController) GetThreadByID(ID string) (*entities.Thread, error) {
+func (tc *ThreadController) GetThreadByID(ID string) (entities.Thread, error) {
 	tu := usecases.NewThreadUsecase(tc.Repository)
 
 	tid, err := convertIDToThreadID(ID)
 	if err != nil {
-		return nil, err
+		return entities.Thread{}, err
 	}
 
 	return tu.GetThreadByID(tid, gateways.GetInMemoryRepositoryInstance())
@@ -45,47 +45,47 @@ func (tc *ThreadController) GetThreadByID(ID string) (*entities.Thread, error) {
 
 // AddThread はPostされてきたデータを元にThreadを追加します。
 // コマンド・クエリの原則からは外れますがAPIのレスポンスに登録したデータを返却するためにエンティティを返します。
-func (tc *ThreadController) AddThread(c *gin.Context) (*entities.Thread, error) {
+func (tc *ThreadController) AddThread(c *gin.Context) (entities.Thread, error) {
 	pt := Thread{}
 	err := c.BindJSON(&pt)
 	if err != nil {
-		return nil, errorobjects.NewParameterBindingError(err)
+		return entities.Thread{}, errorobjects.NewParameterBindingError(err)
 	}
 
 	validate := validator.New()
 	err = validate.Struct(pt)
 	if err != nil {
-		return nil, errorobjects.NewMissingRequiredFieldsError(err)
+		return entities.Thread{}, errorobjects.NewMissingRequiredFieldsError(err)
 	}
 
 	tid, err := valueobjects.NewThreadID("")
 	if err != nil {
-		return nil, err
+		return entities.Thread{}, err
 	}
 
 	convertIDToBulletinBoardID(pt.BulletinBoardID)
 	bid, err := convertIDToBulletinBoardID(pt.BulletinBoardID)
 	if err != nil {
-		return nil, err
+		return entities.Thread{}, err
 	}
 
 	t, err := entities.NewThread(tid.Get(), bid, pt.Title)
 	if err != nil {
-		return nil, err
+		return entities.Thread{}, err
 	}
 
 	tu := usecases.NewThreadUsecase(tc.Repository)
-	return &t, tu.AddThread(t, gateways.GetInMemoryRepositoryInstance())
+	return t, tu.AddThread(t, gateways.GetInMemoryRepositoryInstance())
 }
 
 // ListThread はThreadの一覧を取得します。
-func (tc *ThreadController) ListThread() ([]*entities.Thread, error) {
+func (tc *ThreadController) ListThread() ([]entities.Thread, error) {
 	tu := usecases.NewThreadUsecase(tc.Repository)
 	return tu.ListThread()
 }
 
 // ListThreadByBulletinBoardID は指定されたBulletinBoardIDを持つThread一覧を取得します。
-func (tc *ThreadController) ListThreadByBulletinBoardID(bID string) ([]*entities.Thread, error) {
+func (tc *ThreadController) ListThreadByBulletinBoardID(bID string) ([]entities.Thread, error) {
 	bid, err := convertIDToBulletinBoardID(bID)
 	if err != nil {
 		return nil, err

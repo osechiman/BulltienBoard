@@ -31,12 +31,12 @@ func NewBulletinBoardController(r usecases.BulletinBoardRepositorer) *BulletinBo
 }
 
 // GetBulletinBoardByID はBulletinBoardIDからBulletinBoardを取得します。
-func (bbc *BulletinBoardController) GetBulletinBoardByID(ID string) (*entities.BulletinBoard, error) {
+func (bbc *BulletinBoardController) GetBulletinBoardByID(ID string) (entities.BulletinBoard, error) {
 	bbu := usecases.NewBulletinBoardUsecase(bbc.Repository)
 
 	bbid, err := convertIDToBulletinBoardID(ID)
 	if err != nil {
-		return nil, err
+		return entities.BulletinBoard{}, err
 	}
 
 	tr := gateways.GetInMemoryRepositoryInstance()
@@ -45,34 +45,34 @@ func (bbc *BulletinBoardController) GetBulletinBoardByID(ID string) (*entities.B
 
 // AddBulletinBoard はPostされてきたデータを元にBulletinBoardを追加します。
 // コマンド・クエリの原則からは外れますがAPIのレスポンスに登録したデータを返却するためにエンティティを返します。
-func (bbc *BulletinBoardController) AddBulletinBoard(c *gin.Context) (*entities.BulletinBoard, error) {
+func (bbc *BulletinBoardController) AddBulletinBoard(c *gin.Context) (entities.BulletinBoard, error) {
 	pb := BulletinBoard{}
 	err := c.BindJSON(&pb)
 	if err != nil {
-		return nil, errorobjects.NewParameterBindingError(err)
+		return entities.BulletinBoard{}, errorobjects.NewParameterBindingError(err)
 	}
 	validate := validator.New()
 	err = validate.Struct(pb)
 	if err != nil {
-		return nil, errorobjects.NewMissingRequiredFieldsError(err)
+		return entities.BulletinBoard{}, errorobjects.NewMissingRequiredFieldsError(err)
 	}
 
 	bbid, err := valueobjects.NewBulletinBoardID("")
 	if err != nil {
-		return nil, err
+		return entities.BulletinBoard{}, err
 	}
 
 	bb, err := entities.NewBulletinBoard(bbid, pb.Title)
 	if err != nil {
-		return nil, err
+		return entities.BulletinBoard{}, err
 	}
 
 	bbu := usecases.NewBulletinBoardUsecase(bbc.Repository)
-	return &bb, bbu.AddBulletinBoard(bb)
+	return bb, bbu.AddBulletinBoard(bb)
 }
 
 // ListBulletinBoard はBulletinBoardの一覧を取得します。
-func (bbc *BulletinBoardController) ListBulletinBoard() ([]*entities.BulletinBoard, error) {
+func (bbc *BulletinBoardController) ListBulletinBoard() ([]entities.BulletinBoard, error) {
 	bbu := usecases.NewBulletinBoardUsecase(bbc.Repository)
 	return bbu.ListBulletinBoard()
 }

@@ -17,20 +17,20 @@ func NewBulletinBoardUsecase(r BulletinBoardRepositorer) *BulletinBoardUsecase {
 }
 
 // GetBulletinBoardByID は指定されたvalueobjects.BulletinBoardIDを持つentities.BulletinBoardを取得します。
-func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBoardID, threadRepository ThreadRepositorer) (*entities.BulletinBoard, error) {
+func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBoardID, threadRepository ThreadRepositorer) (entities.BulletinBoard, error) {
 	tl, err := threadRepository.ListThreadByBulletinBoardID(ID)
 	if err != nil {
 		switch err.(type) {
 		case *errorobjects.NotFoundError:
-			tl = make([]*entities.Thread, 0)
+			tl = make([]entities.Thread, 0)
 		default:
-			return nil, err
+			return entities.BulletinBoard{}, errorobjects.NewInternalServerError(err.Error())
 		}
 	}
 
 	b, err := bbu.Repository.GetBulletinBoardByID(ID)
 	if err != nil {
-		return nil, err
+		return entities.BulletinBoard{}, err
 	}
 
 	b.Threads = tl
@@ -38,11 +38,11 @@ func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBo
 }
 
 // AddBulletinBoard はentities.BulletinBoardを追加します。
-func (bbu *BulletinBoardUsecase) AddBulletinBoard(q entities.BulletinBoard) error {
-	return bbu.Repository.AddBulletinBoard(q)
+func (bbu *BulletinBoardUsecase) AddBulletinBoard(bb entities.BulletinBoard) error {
+	return bbu.Repository.AddBulletinBoard(bb)
 }
 
 // ListBulletinBoard はentities.BulletinBoardの一覧を取得します。
-func (bbu *BulletinBoardUsecase) ListBulletinBoard() ([]*entities.BulletinBoard, error) {
+func (bbu *BulletinBoardUsecase) ListBulletinBoard() ([]entities.BulletinBoard, error) {
 	return bbu.Repository.ListBulletinBoard()
 }

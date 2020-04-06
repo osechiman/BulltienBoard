@@ -12,7 +12,7 @@ type Thread struct {
 	ID              ThreadIDer        // ID はThreadIDインターフェースです。
 	BulletinBoardID BulletinBoardIDer // BulletinBoardIDer はBulletinBoardIDインターフェースです。
 	Title           string            `validate:"required,min=1,max=50"` // Title はThreadのTitleです。
-	Comments        []*Comment        // Comments はCommentの一覧です。
+	Comments        []Comment         // Comments はCommentの一覧です。
 }
 
 // NewThread はThreadを初期化します。

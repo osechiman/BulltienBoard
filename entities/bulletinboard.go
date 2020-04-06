@@ -11,7 +11,7 @@ import (
 type BulletinBoard struct {
 	ID      BulletinBoardIDer // ID はBulletinBoardIDインターフェースです。
 	Title   string            `validate:"required,min=1,max=50"` // Title はBulletinBoardのTitleです。
-	Threads []*Thread         // Thread はThreadの一覧です。
+	Threads []Thread          // Thread はThreadの一覧です。
 }
 
 // NewBulletinBoard はBulletinBoardを初期化します。

@@ -15,36 +15,36 @@ func NewThreadPresenter() *ThreadPresenter {
 
 // Thread はentitiesを外部へ渡す際に利用するStructです。
 type Thread struct {
-	ID              string     // ID はThreadのIDです。
-	BulletinBoardID string     // BulletinBoardIDer はBulletinBoardのIDです。
-	Title           string     // Title はThreadのTitleです。
-	Comments        []*Comment // Comments はCommentの一覧です。
+	ID              string    // ID はThreadのIDです。
+	BulletinBoardID string    // BulletinBoardIDer はBulletinBoardのIDです。
+	Title           string    // Title はThreadのTitleです。
+	Comments        []Comment // Comments はCommentの一覧です。
 }
 
 // ConvertToHttpThreadListResponse はThread一覧のレスポンスを返却します。
-func (tp *ThreadPresenter) ConvertToHttpThreadListResponse(tl []*entities.Thread) *HTTPResponse {
-	res := make([]*Thread, 0)
+func (tp *ThreadPresenter) ConvertToHttpThreadListResponse(tl []entities.Thread) *HTTPResponse {
+	res := make([]Thread, 0)
 	for _, t := range tl {
 		pt := convertEntitiesThreadToThread(t)
-		pt.Comments = make([]*Comment, 0)
+		pt.Comments = make([]Comment, 0)
 		res = append(res, pt)
 	}
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
 // ConvertToHttpBulletinBoardResponse はCommentを含むThreadのレスポンスを返却します。
-func (tp *ThreadPresenter) ConvertToHttpThreadResponse(t *entities.Thread) *HTTPResponse {
-	res := make([]*Thread, 0)
+func (tp *ThreadPresenter) ConvertToHttpThreadResponse(t entities.Thread) *HTTPResponse {
+	res := make([]Thread, 0)
 	pt := convertEntitiesThreadToThread(t)
 	if pt.Comments == nil {
-		pt.Comments = make([]*Comment, 0)
+		pt.Comments = make([]Comment, 0)
 	}
 	res = append(res, pt)
 	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
 }
 
 // convertEntitiesThreadToThread はentities.ThreadからHTTPレスポンス用のStructを返却します。
-func convertEntitiesThreadToThread(t *entities.Thread) *Thread {
+func convertEntitiesThreadToThread(t entities.Thread) Thread {
 	pt := Thread{
 		ID:              t.ID.String(),
 		BulletinBoardID: t.BulletinBoardID.String(),
@@ -53,13 +53,13 @@ func convertEntitiesThreadToThread(t *entities.Thread) *Thread {
 
 	// see https://golang.org/doc/faq#nil_error
 	if t.Comments == nil {
-		pt.Comments = make([]*Comment, 0)
-		return &pt
+		pt.Comments = make([]Comment, 0)
+		return pt
 	}
 
-	cl := make([]*Comment, 0)
+	cl := make([]Comment, 0)
 	for _, c := range t.Comments {
-		cl = append(cl, &Comment{
+		cl = append(cl, Comment{
 			ID:       c.ID.String(),
 			ThreadID: c.ThreadID.String(),
 			Text:     c.Text,
@@ -67,5 +67,5 @@ func convertEntitiesThreadToThread(t *entities.Thread) *Thread {
 		})
 	}
 	pt.Comments = cl
-	return &pt
+	return pt
 }

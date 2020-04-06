@@ -17,20 +17,20 @@ func NewThreadUsecase(r ThreadRepositorer) *ThreadUsecase {
 }
 
 // GetThreadByID は指定されたvalueobjects.ThreadIDを持つentities.Threadを取得します。
-func (tu *ThreadUsecase) GetThreadByID(ID valueobjects.ThreadID, commentRepository CommentRepositorer) (*entities.Thread, error) {
+func (tu *ThreadUsecase) GetThreadByID(ID valueobjects.ThreadID, commentRepository CommentRepositorer) (entities.Thread, error) {
 	cl, err := commentRepository.ListCommentByThreadID(ID)
 	if err != nil {
 		switch err.(type) {
 		case *errorobjects.NotFoundError:
-			cl = make([]*entities.Comment, 0)
+			cl = make([]entities.Comment, 0)
 		default:
-			return nil, err
+			return entities.Thread{}, err
 		}
 	}
 
 	t, err := tu.Repository.GetThreadByID(ID)
 	if err != nil {
-		return nil, err
+		return entities.Thread{}, err
 	}
 
 	t.Comments = cl
@@ -47,11 +47,11 @@ func (tu *ThreadUsecase) AddThread(t entities.Thread, bulletinBoardRepository Bu
 }
 
 // ListThread はentities.Threadの一覧を取得します。
-func (tu *ThreadUsecase) ListThread() ([]*entities.Thread, error) {
+func (tu *ThreadUsecase) ListThread() ([]entities.Thread, error) {
 	return tu.Repository.ListThread()
 }
 
 // ListThreadByBulletinBoardID は指定されたvalueobjects.BulletinBoardIDを持つentities.Threadの一覧を取得します。
-func (tu *ThreadUsecase) ListThreadByBulletinBoardID(bID valueobjects.BulletinBoardID) ([]*entities.Thread, error) {
+func (tu *ThreadUsecase) ListThreadByBulletinBoardID(bID valueobjects.BulletinBoardID) ([]entities.Thread, error) {
 	return tu.Repository.ListThreadByBulletinBoardID(bID)
 }
