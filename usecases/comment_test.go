@@ -27,7 +27,7 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 				Repository: testComment.repository,
 			},
 			args: args{
-				c:                testComment.c,
+				c:                entities.Comment{},
 				threadRepository: testComment.tRepository,
 			},
 			wantErr: false,

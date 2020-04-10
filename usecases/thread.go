@@ -6,6 +6,8 @@ import (
 	"vspro/entities/valueobjects"
 )
 
+const ThreadLimit = 50
+
 // ThreadUsecase はThreadに対するUsecaseを定義するものです。
 type ThreadUsecase struct {
 	Repository ThreadRepositorer // Repositorer は外部データソースに存在するentities.Threadを操作する際に利用するインターフェースです。
@@ -37,12 +39,23 @@ func (tu *ThreadUsecase) GetThreadByID(ID valueobjects.ThreadID, commentReposito
 	return t, nil
 }
 
-// AddThread はentities.Threadを追加します。
+// AddThread は自信が持つBulletinBoardIDのBulletinBoardが存在するかをチェックし、
+// 現在登録されているThreadの数を確認して閾値に達成していなければentities.Threadを追加します。
 func (tu *ThreadUsecase) AddThread(t entities.Thread, bulletinBoardRepository BulletinBoardRepositorer) error {
 	_, err := bulletinBoardRepository.GetBulletinBoardByID(t.BulletinBoardID.Get())
 	if err != nil {
 		return err
 	}
+
+	ts, err := tu.Repository.ListThread()
+	if err != nil {
+		return err
+	}
+
+	if len(ts) > ThreadLimit {
+		return errorobjects.NewResourceLimitedError("maximum number of thread exceeded. thread limit is " + string(ThreadLimit))
+	}
+
 	return tu.Repository.AddThread(t)
 }
 

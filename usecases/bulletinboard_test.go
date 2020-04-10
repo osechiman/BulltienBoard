@@ -2,12 +2,23 @@ package usecases
 
 import (
 	"reflect"
+	"sort"
 	"testing"
+	"vspro/adapters/gateways"
 	"vspro/entities"
 	"vspro/entities/valueobjects"
 )
 
 func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b := entities.BulletinBoard{
+		ID:      bid,
+		Title:   "bulletin board title",
+		Threads: []entities.Thread{},
+	}
 	type fields struct {
 		Repository BulletinBoardRepositorer
 	}
@@ -23,10 +34,10 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 		{
 			name: "エンティティの登録が正常に出来る",
 			fields: fields{
-				Repository: testBulletinBoard.repository,
+				Repository: repository,
 			},
 			args: args{
-				bb: testBulletinBoard.bb,
+				bb: b,
 			},
 			wantErr: false,
 		},
@@ -41,13 +52,47 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("BulletinBoardの登録数がBulletinBoardLimitを超えて登録された場合エラーが返却される", func(t *testing.T) {
+		repository.DeleteAll()
+		bbu := &BulletinBoardUsecase{
+			Repository: repository,
+		}
+		for i := 0; i < BulletinBoardLimit; i++ {
+			bid, _ = valueobjects.NewBulletinBoardID("")
+			b = entities.BulletinBoard{
+				ID:      bid,
+				Title:   "bulletin board " + string(i),
+				Threads: []entities.Thread{},
+			}
+			repository.AddBulletinBoard(b)
+		}
+
+		bid, _ = valueobjects.NewBulletinBoardID("")
+		b = entities.BulletinBoard{
+			ID:      bid,
+			Title:   "bulletin board last",
+			Threads: []entities.Thread{},
+		}
+		wantErr := true
+		if err := bbu.AddBulletinBoard(b); (err != nil) != wantErr {
+			t.Errorf("AddBulletinBoard() error = %v, wantErr %v", err, wantErr)
+		}
+	})
+
 }
 
 func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
-	bb := testBulletinBoard.bb
-	bb.Threads = append(bb.Threads, testThread.t, testThread.t2)
-	bid, _ := valueobjects.NewBulletinBoardID("")
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
 
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b := entities.BulletinBoard{
+		ID:      bid,
+		Title:   "bulletin board title",
+		Threads: []entities.Thread{},
+	}
+	repository.AddBulletinBoard(b)
 	type fields struct {
 		Repository BulletinBoardRepositorer
 	}
@@ -65,22 +110,26 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 		{
 			name: "BulletinBoardIDからentities.BulletinBoardが取得出来る",
 			fields: fields{
-				Repository: testBulletinBoard.repository,
+				Repository: repository,
 			},
 			args: args{
-				ID:               testBulletinBoard.bid,
-				threadRepository: testThread.repository,
+				ID:               bid,
+				threadRepository: repository,
 			},
-			want:    bb,
+			want: entities.BulletinBoard{
+				ID:      bid,
+				Title:   "bulletin board title",
+				Threads: []entities.Thread{},
+			},
 			wantErr: false,
 		},
 		{
 			name: "BulletinBoardIDが存在しない値だった場合、エラーが返却される",
 			fields: fields{
-				Repository: testBulletinBoard.repository,
+				Repository: repository,
 			},
 			args: args{
-				ID:               bid,
+				ID:               valueobjects.BulletinBoardID{},
 				threadRepository: testThread.repository,
 			},
 			want:    entities.BulletinBoard{},
@@ -102,11 +151,66 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("BulletinBoardにThreadが登録されていた場合はThreadの内容も返却される", func(t *testing.T) {
+		repository.DeleteAll()
+		bid, _ = valueobjects.NewBulletinBoardID("")
+		b = entities.BulletinBoard{
+			ID:      bid,
+			Title:   "bulletin board title",
+			Threads: []entities.Thread{},
+		}
+		bbu := &BulletinBoardUsecase{
+			Repository: repository,
+		}
+		repository.AddBulletinBoard(b)
+
+		tid, _ := valueobjects.NewThreadID("")
+		th := entities.Thread{
+			ID:              tid,
+			BulletinBoardID: bid,
+			Title:           "thread title",
+			Comments:        []entities.Comment{},
+		}
+		repository.AddThread(th)
+
+		wantErr := false
+		b.Threads = append(b.Threads, th)
+		want := b
+
+		got, err := bbu.GetBulletinBoardByID(bid, repository)
+		if (err != nil) != wantErr {
+			t.Errorf("GetBulletinBoardByID() error = %v, wantErr %v", err, wantErr)
+			return
+		}
+		if !reflect.DeepEqual(got, want) {
+			t.Errorf("GetBulletinBoardByID() got = %v, want %v", got, want)
+		}
+	})
 }
 
 func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
-	bbs := make([]entities.BulletinBoard, 0)
-	bbs = append(bbs, testBulletinBoard.bb, testBulletinBoard.bb2)
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b := entities.BulletinBoard{
+		ID:      bid,
+		Title:   "bulletin board title",
+		Threads: []entities.Thread{},
+	}
+	repository.AddBulletinBoard(b)
+
+	bid2, _ := valueobjects.NewBulletinBoardID("")
+	b2 := entities.BulletinBoard{
+		ID:      bid2,
+		Title:   "bulletin board title 2",
+		Threads: []entities.Thread{},
+	}
+	repository.AddBulletinBoard(b2)
+
+	want := append([]entities.BulletinBoard{}, b, b2)
+
 	type fields struct {
 		Repository BulletinBoardRepositorer
 	}
@@ -119,9 +223,9 @@ func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
 		{
 			name: "[]entities.BulletinBoardが取得出来る",
 			fields: fields{
-				Repository: testBulletinBoard.repository,
+				Repository: repository,
 			},
-			want:    bbs,
+			want:    want,
 			wantErr: false,
 		},
 	}
@@ -135,6 +239,14 @@ func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
 				t.Errorf("ListBulletinBoard() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
+
+			// Sliceの順序はソートせずに返却する仕様なので、テスト時には一度ソートをして値が等価であるかを検証します。
+			sort.Slice(got, func(i, j int) bool {
+				return got[i].ID.String() < got[j].ID.String()
+			})
+			sort.Slice(tt.want, func(i, j int) bool {
+				return tt.want[i].ID.String() < tt.want[j].ID.String()
+			})
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ListBulletinBoard() got = %v, want %v", got, tt.want)
 			}

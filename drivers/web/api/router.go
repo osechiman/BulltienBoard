@@ -73,6 +73,9 @@ func responseByError(c *gin.Context, err error) {
 		case *errorobjects.CharacterSizeValidationError:
 			c.JSON(http.StatusBadRequest, ep.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
+		case *errorobjects.ResourceLimitedError:
+			c.JSON(http.StatusInsufficientStorage, ep.ConvertToHttpErrorResponse(http.StatusInsufficientStorage, t))
+			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		default:
 			c.JSON(http.StatusInternalServerError, ep.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
 			logger.GetLoggerColumns(c).Error(c, t.Error())

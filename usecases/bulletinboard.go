@@ -6,6 +6,8 @@ import (
 	"vspro/entities/valueobjects"
 )
 
+const BulletinBoardLimit = 50
+
 // BulletinBoardUsecase はBulletinBoardに対するUsecaseを定義するものです。
 type BulletinBoardUsecase struct {
 	Repository BulletinBoardRepositorer // Repository は外部データソースに存在するentities.BulletinBoardを操作する際に利用するインターフェースです。
@@ -37,8 +39,22 @@ func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBo
 	return b, nil
 }
 
-// AddBulletinBoard はentities.BulletinBoardを追加します。
+// AddBulletinBoard は現在登録されているBulletinBoardの数を確認して、閾値に達成していなければentities.BulletinBoardを追加します。
 func (bbu *BulletinBoardUsecase) AddBulletinBoard(bb entities.BulletinBoard) error {
+	bbs, err := bbu.Repository.ListBulletinBoard()
+	if err != nil {
+		switch err.(type) {
+		// NotFoundErrorの場合は処理を中断しない
+		case *errorobjects.NotFoundError:
+		default:
+			return err
+		}
+	}
+
+	if len(bbs) >= BulletinBoardLimit {
+		return errorobjects.NewResourceLimitedError("maximum number of bulletin boards exceeded")
+	}
+
 	return bbu.Repository.AddBulletinBoard(bb)
 }
 

@@ -14,8 +14,6 @@ type TestBulletinBoard struct {
 	repository BulletinBoardRepositorer
 	bid        valueobjects.BulletinBoardID
 	title      string
-	bb         entities.BulletinBoard
-	bb2        entities.BulletinBoard
 }
 
 var testThread TestThread
@@ -25,8 +23,6 @@ type TestThread struct {
 	tid        valueobjects.ThreadID
 	bid        valueobjects.BulletinBoardID
 	title      string
-	t          entities.Thread
-	t2         entities.Thread
 }
 
 var testComment TestComment
@@ -38,10 +34,9 @@ type TestComment struct {
 	tid         valueobjects.ThreadID
 	ct          valueobjects.CommentTime
 	text        string
-	c           entities.Comment
-	c2          entities.Comment
 }
 
+//TODO:: 事前にデータを用意するのは無理だと判断したのでデータ登録部分は各テストケース無いで行う
 func TestMain(m *testing.M) {
 	SetUp()
 	ec := m.Run()
@@ -60,20 +55,10 @@ func SetUpBulletinBoardTest() {
 	r := gateways.GetInMemoryRepositoryInstance()
 	bid, _ := valueobjects.NewBulletinBoardID("")
 	bt := "bulletin board title"
-	bb, _ := entities.NewBulletinBoard(bid, bt)
-	r.AddBulletinBoard(bb)
-
-	bid2, _ := valueobjects.NewBulletinBoardID("")
-	bt2 := "bulletin board title2"
-	bb2, _ := entities.NewBulletinBoard(bid2, bt2)
-	r.AddBulletinBoard(bb2)
-
 	testBulletinBoard = TestBulletinBoard{
 		repository: r,
 		bid:        bid,
 		title:      bt,
-		bb:         bb,
-		bb2:        bb2,
 	}
 }
 
@@ -95,8 +80,6 @@ func SetUpThreadTest() {
 		tid:        tid,
 		bid:        testBulletinBoard.bid,
 		title:      title,
-		t:          t,
-		t2:         t2,
 	}
 }
 
@@ -106,14 +89,6 @@ func SetUpCommentTest() {
 	cid, _ := valueobjects.NewCommentID("")
 	ct, _ := valueobjects.NewCommentTime(-1)
 	text := "comment"
-	c, _ := entities.NewComment(cid, testThread.tid, text, ct)
-	r.AddComment(c)
-
-	cid2, _ := valueobjects.NewCommentID("")
-	ct2, _ := valueobjects.NewCommentTime(-1)
-	text2 := "comment2"
-	c2, _ := entities.NewComment(cid2, testThread.tid, text2, ct2)
-	r.AddComment(c2)
 
 	testComment = TestComment{
 		repository:  r,
@@ -122,6 +97,5 @@ func SetUpCommentTest() {
 		tid:         testThread.tid,
 		ct:          ct,
 		text:        text,
-		c:           c,
 	}
 }

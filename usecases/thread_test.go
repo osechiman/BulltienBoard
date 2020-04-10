@@ -55,7 +55,7 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 				Repository: testThread.repository,
 			},
 			args: args{
-				t:                       testThread.t,
+				t:                       entities.Thread{},
 				bulletinBoardRepository: testBulletinBoard.repository,
 			},
 			wantErr: false,
@@ -74,9 +74,6 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 }
 
 func TestThreadUsecase_GetThreadByID(t *testing.T) {
-	tid, _ := valueobjects.NewThreadID("")
-	tt := testThread.t
-	tt.Comments = append(tt.Comments, testComment.c, testComment.c2)
 	type fields struct {
 		Repository ThreadRepositorer
 	}
@@ -100,7 +97,7 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 				ID:                testThread.tid,
 				commentRepository: testComment.repository,
 			},
-			want:    tt,
+			want:    entities.Thread{},
 			wantErr: false,
 		},
 		{
@@ -109,7 +106,7 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 				Repository: testThread.repository,
 			},
 			args: args{
-				ID:                tid,
+				ID:                valueobjects.ThreadID{},
 				commentRepository: testComment.repository,
 			},
 			want:    entities.Thread{},
@@ -134,8 +131,6 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 }
 
 func TestThreadUsecase_ListThread(t *testing.T) {
-	ts := make([]entities.Thread, 0)
-	ts = append(ts, testThread.t, testThread.t2)
 	type fields struct {
 		Repository ThreadRepositorer
 	}
@@ -150,7 +145,7 @@ func TestThreadUsecase_ListThread(t *testing.T) {
 			fields: fields{
 				Repository: testThread.repository,
 			},
-			want:    ts,
+			want:    []entities.Thread{},
 			wantErr: false,
 		},
 	}
