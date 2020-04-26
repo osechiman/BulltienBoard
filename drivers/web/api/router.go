@@ -7,8 +7,13 @@ import (
 	"vspro/drivers/configs"
 	"vspro/entities/errorobjects"
 
+	"gopkg.in/olahol/melody.v1"
+
 	"github.com/gin-gonic/gin"
 )
+
+// TODO:: 別のパッケージでシングルトンかつセッション管理できるものを作る
+var m = melody.New()
 
 // Listen はAPIがリクエストを受け取れる様に待機状態にします。
 func Listen() {
@@ -48,12 +53,50 @@ func Listen() {
 			comments := v1.Group("/comments")
 			{
 				comments.GET("", listComment)
+				comments.GET("/new", newComment)
 				comments.POST("", postComment)
 			}
 		}
 	}
 
 	router.Run(":8080")
+}
+
+// TODO:: implements
+func newComment(c *gin.Context) {
+	err := m.HandleRequest(c.Writer, c.Request)
+	// TODO:: cookie を取得して、存在しない場合はセットする @ gin middleware
+	// https://github.com/gin-gonic/gin#set-and-get-a-cookie
+	if err != nil {
+		logger.GetLoggerColumns(c).Error(c, err.Error())
+	}
+
+	// m.HandleConnect(func(s *melody.Session) {
+	// 	// TODO:: すでに接続済みのユーザーかどうか判定
+	// })
+
+	// m.HandleMessage(func(s *melody.Session, msg []byte) {
+	// 	// TODO:: コメントの更新があれば送信する
+	// })
+
+	// m.HandleError(func(s *melody.Session, err error) {
+	// 	// TODO:: 調べてエラーハンドリング
+
+	// })
+
+	// 	mrouter.HandleMessage(func(s *melody.Session, msg []byte) {
+	// 		mrouter.Broadcast(msg)
+	// 		d, _ := strconv.Atoi(string(msg))
+	// 		battle.Participant[s] = User{battle.Participant[s].ID, battle.Participant[s].LifePoint - d}
+	// 		l := strconv.Itoa(battle.Participant[s].LifePoint)
+	// 		dm := []byte("user:" + battle.Participant[s].ID + " collect answer. remaining is " + l)
+	// 		mrouter.Broadcast(dm)
+	// 	})
+	// 	mrouter.HandleConnect(func(s *melody.Session) {
+	// 		u := User{uuid.New().String(), life}
+	// 		battle.Participant[s] = u
+	// 	})
+	// 	router.Run(":8080")
 }
 
 // responseByError はerrorobjectsのType毎にjsonを出力します。

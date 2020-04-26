@@ -1,9 +1,11 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"vspro/adapters/controllers"
 	"vspro/adapters/gateways"
+	"vspro/adapters/middlewares/logger"
 	"vspro/adapters/presenters"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +23,15 @@ func postComment(c *gin.Context) {
 	}
 
 	res := cp.ConvertToHttpCommentResponse(cm)
+	j, err := json.Marshal(res)
+	if err != nil {
+		logger.GetLoggerColumns(c).Warn(c, err.Error())
+	}
+
+	err = m.Broadcast(j)
+	if err != nil {
+		logger.GetLoggerColumns(c).Warn(c, err.Error())
+	}
 	c.JSON(http.StatusCreated, res)
 	return
 }
