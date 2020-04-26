@@ -28,10 +28,15 @@ func (cc *CommentUsecase) AddComment(c entities.Comment, threadRepository Thread
 
 	cs, err := cc.Repository.ListComment()
 	if err != nil {
-		return err
+		switch err.(type) {
+		// AddCommentにおいては一覧が取得出来なくても登録できる仕様なのでNotFoundErrorは無視します。
+		case *errorobjects.NotFoundError:
+		default:
+			return err
+		}
 	}
 
-	if len(cs) > CommentLimit {
+	if len(cs) >= CommentLimit {
 		return errorobjects.NewResourceLimitedError("maximum number of comment exceeded. comment limit is " + string(CommentLimit))
 	}
 

@@ -2,12 +2,38 @@ package usecases
 
 import (
 	"reflect"
+	"sort"
 	"testing"
+	"vspro/adapters/gateways"
 	"vspro/entities"
 	"vspro/entities/valueobjects"
 )
 
 func TestCommentUsecase_AddComment(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+	repository.AddBulletinBoard(b)
+
+	tid, _ := valueobjects.NewThreadID("")
+	th, _ := entities.NewThread(tid, bid, "thread title")
+
+	tid1, _ := valueobjects.NewThreadID("")
+
+	repository.AddThread(th)
+
+	cid, _ := valueobjects.NewCommentID("")
+	ct, _ := valueobjects.NewCommentTime(-1)
+	c := entities.Comment{
+		ID:       cid,
+		ThreadID: tid,
+		Text:     "comment",
+		CreateAt: ct,
+	}
+
 	type fields struct {
 		Repository CommentRepositorer
 	}
@@ -24,13 +50,28 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 		{
 			name: "エンティティの登録が正常に出来る",
 			fields: fields{
-				Repository: testComment.repository,
+				Repository: repository,
 			},
 			args: args{
-				c:                entities.Comment{},
-				threadRepository: testComment.tRepository,
+				c:                c,
+				threadRepository: repository,
 			},
 			wantErr: false,
+		},
+		{
+			name: "entities.Commentに指定するThreadIDがRepositoryに存在しない値だった場合、エラーが返却される",
+			fields: fields{
+				Repository: repository,
+			},
+			args: args{
+				c: entities.Comment{
+					ID:       cid,
+					ThreadID: tid1,
+					Text:     "comment",
+				},
+				threadRepository: repository,
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -43,19 +84,89 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 			}
 		})
 	}
+
+	t.Run("Commentの登録数がCommentLimitを超えて登録された場合、エラーが返却される", func(t *testing.T) {
+		repository := gateways.GetInMemoryRepositoryInstance()
+		repository.DeleteAll()
+
+		cc := &CommentUsecase{
+			Repository: repository,
+		}
+		bid, _ := valueobjects.NewBulletinBoardID("")
+		b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+		repository.AddBulletinBoard(b)
+
+		tid, _ := valueobjects.NewThreadID("")
+		th, _ := entities.NewThread(tid, bid, "thread title")
+
+		repository.AddThread(th)
+
+		// 上限値までCommentを登録する
+		for i := 0; i < CommentLimit; i++ {
+			cid, _ := valueobjects.NewCommentID("")
+			ct, _ := valueobjects.NewCommentTime(-1)
+			c, _ := entities.NewComment(cid, tid, "comment", ct)
+			repository.AddComment(c)
+		}
+
+		// 上限値以上に登録する為のComment生成
+		cid, _ := valueobjects.NewCommentID("")
+		ct, _ := valueobjects.NewCommentTime(-1)
+		c, _ := entities.NewComment(cid, tid, "last comment", ct)
+
+		wantErr := true
+		if err := cc.AddComment(c, repository); (err != nil) != wantErr {
+			t.Errorf("AddComment() error = %v, wantErr %v", err, wantErr)
+		}
+	})
 }
 
 func TestCommentUsecase_ListComment(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+	repository.AddBulletinBoard(b)
+
+	tid, _ := valueobjects.NewThreadID("")
+	th, _ := entities.NewThread(tid, bid, "thread title")
+
+	repository.AddThread(th)
+
+	cid, _ := valueobjects.NewCommentID("")
+	ct, _ := valueobjects.NewCommentTime(-1)
+	c, _ := entities.NewComment(cid, tid, "comment", ct)
+
+	repository.AddComment(c)
+
+	cid1, _ := valueobjects.NewCommentID("")
+	ct1, _ := valueobjects.NewCommentTime(-1)
+	c1, _ := entities.NewComment(cid1, tid, "comment", ct1)
+
+	repository.AddComment(c1)
+
+	want := append([]entities.Comment{}, c, c1)
+
 	type fields struct {
 		Repository CommentRepositorer
 	}
 	tests := []struct {
 		name    string
 		fields  fields
-		want    []*entities.Comment
+		want    []entities.Comment
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "[]entities.Commentが取得出来る",
+			fields: fields{
+				Repository: repository,
+			},
+			want:    want,
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -63,6 +174,15 @@ func TestCommentUsecase_ListComment(t *testing.T) {
 				Repository: tt.fields.Repository,
 			}
 			got, err := cc.ListComment()
+
+			// Sliceの順序はソートせずに返却する仕様なので、テスト時には一度ソートをして値が等価であるかを検証します。
+			sort.Slice(got, func(i, j int) bool {
+				return got[i].ID.String() < got[j].ID.String()
+			})
+			sort.Slice(tt.want, func(i, j int) bool {
+				return tt.want[i].ID.String() < tt.want[j].ID.String()
+			})
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListComment() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -75,6 +195,32 @@ func TestCommentUsecase_ListComment(t *testing.T) {
 }
 
 func TestCommentUsecase_ListCommentByThreadID(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+	repository.AddBulletinBoard(b)
+
+	tid, _ := valueobjects.NewThreadID("")
+	th, _ := entities.NewThread(tid, bid, "thread title")
+
+	repository.AddThread(th)
+
+	tid1, _ := valueobjects.NewThreadID("")
+	th1, _ := entities.NewThread(tid1, bid, "thread1 title")
+
+	repository.AddThread(th1)
+
+	cid, _ := valueobjects.NewCommentID("")
+	ct, _ := valueobjects.NewCommentTime(-1)
+	c, _ := entities.NewComment(cid, tid, "comment", ct)
+
+	repository.AddComment(c)
+
+	cs := append([]entities.Comment{}, c)
+
 	type fields struct {
 		Repository CommentRepositorer
 	}
@@ -85,10 +231,31 @@ func TestCommentUsecase_ListCommentByThreadID(t *testing.T) {
 		name    string
 		fields  fields
 		args    args
-		want    []*entities.Comment
+		want    []entities.Comment
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "指定するThreadIDに紐づくCommentのみが取得出来る",
+			fields: fields{
+				Repository: repository,
+			},
+			args: args{
+				tID: tid,
+			},
+			want:    cs,
+			wantErr: false,
+		},
+		{
+			name: "指定するThreadIDに紐づくCommentが存在しない場合、エラーが返却される",
+			fields: fields{
+				Repository: repository,
+			},
+			args: args{
+				tID: tid1,
+			},
+			want:    []entities.Comment{},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -108,6 +275,9 @@ func TestCommentUsecase_ListCommentByThreadID(t *testing.T) {
 }
 
 func TestNewCommentUsecase(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
 	type args struct {
 		r CommentRepositorer
 	}
@@ -116,7 +286,15 @@ func TestNewCommentUsecase(t *testing.T) {
 		args args
 		want *CommentUsecase
 	}{
-		// TODO: Add test cases.
+		{
+			name: "オブジェクトが正常に生成される",
+			args: args{
+				r: repository,
+			},
+			want: &CommentUsecase{
+				Repository: repository,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

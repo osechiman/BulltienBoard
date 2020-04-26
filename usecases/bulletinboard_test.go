@@ -14,11 +14,8 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 	repository.DeleteAll()
 
 	bid, _ := valueobjects.NewBulletinBoardID("")
-	b := entities.BulletinBoard{
-		ID:      bid,
-		Title:   "bulletin board title",
-		Threads: []entities.Thread{},
-	}
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
 	type fields struct {
 		Repository BulletinBoardRepositorer
 	}
@@ -53,27 +50,20 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 		})
 	}
 
-	t.Run("BulletinBoardの登録数がBulletinBoardLimitを超えて登録された場合エラーが返却される", func(t *testing.T) {
+	t.Run("BulletinBoardの登録数がBulletinBoardLimitを超えて登録された場合、エラーが返却される", func(t *testing.T) {
 		repository.DeleteAll()
 		bbu := &BulletinBoardUsecase{
 			Repository: repository,
 		}
 		for i := 0; i < BulletinBoardLimit; i++ {
 			bid, _ = valueobjects.NewBulletinBoardID("")
-			b = entities.BulletinBoard{
-				ID:      bid,
-				Title:   "bulletin board " + string(i),
-				Threads: []entities.Thread{},
-			}
+			b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
 			repository.AddBulletinBoard(b)
 		}
 
 		bid, _ = valueobjects.NewBulletinBoardID("")
-		b = entities.BulletinBoard{
-			ID:      bid,
-			Title:   "bulletin board last",
-			Threads: []entities.Thread{},
-		}
+		b, _ := entities.NewBulletinBoard(bid, "bulletin board last")
+
 		wantErr := true
 		if err := bbu.AddBulletinBoard(b); (err != nil) != wantErr {
 			t.Errorf("AddBulletinBoard() error = %v, wantErr %v", err, wantErr)
@@ -87,11 +77,7 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 	repository.DeleteAll()
 
 	bid, _ := valueobjects.NewBulletinBoardID("")
-	b := entities.BulletinBoard{
-		ID:      bid,
-		Title:   "bulletin board title",
-		Threads: []entities.Thread{},
-	}
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
 	repository.AddBulletinBoard(b)
 	type fields struct {
 		Repository BulletinBoardRepositorer
@@ -130,7 +116,7 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 			},
 			args: args{
 				ID:               valueobjects.BulletinBoardID{},
-				threadRepository: testThread.repository,
+				threadRepository: repository,
 			},
 			want:    entities.BulletinBoard{},
 			wantErr: true,
@@ -155,23 +141,14 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 	t.Run("BulletinBoardにThreadが登録されていた場合はThreadの内容も返却される", func(t *testing.T) {
 		repository.DeleteAll()
 		bid, _ = valueobjects.NewBulletinBoardID("")
-		b = entities.BulletinBoard{
-			ID:      bid,
-			Title:   "bulletin board title",
-			Threads: []entities.Thread{},
-		}
+		b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
 		bbu := &BulletinBoardUsecase{
 			Repository: repository,
 		}
 		repository.AddBulletinBoard(b)
 
 		tid, _ := valueobjects.NewThreadID("")
-		th := entities.Thread{
-			ID:              tid,
-			BulletinBoardID: bid,
-			Title:           "thread title",
-			Comments:        []entities.Comment{},
-		}
+		th, _ := entities.NewThread(tid, bid, "thread title")
 		repository.AddThread(th)
 
 		wantErr := false
@@ -194,22 +171,14 @@ func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
 	repository.DeleteAll()
 
 	bid, _ := valueobjects.NewBulletinBoardID("")
-	b := entities.BulletinBoard{
-		ID:      bid,
-		Title:   "bulletin board title",
-		Threads: []entities.Thread{},
-	}
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
 	repository.AddBulletinBoard(b)
 
-	bid2, _ := valueobjects.NewBulletinBoardID("")
-	b2 := entities.BulletinBoard{
-		ID:      bid2,
-		Title:   "bulletin board title 2",
-		Threads: []entities.Thread{},
-	}
-	repository.AddBulletinBoard(b2)
+	bid1, _ := valueobjects.NewBulletinBoardID("")
+	b1, _ := entities.NewBulletinBoard(bid1, "bulletin board1 title")
+	repository.AddBulletinBoard(b1)
 
-	want := append([]entities.BulletinBoard{}, b, b2)
+	want := append([]entities.BulletinBoard{}, b, b1)
 
 	type fields struct {
 		Repository BulletinBoardRepositorer
@@ -255,6 +224,9 @@ func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
 }
 
 func TestNewBulletinBoardUsecase(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
 	type args struct {
 		r BulletinBoardRepositorer
 	}
@@ -266,10 +238,10 @@ func TestNewBulletinBoardUsecase(t *testing.T) {
 		{
 			name: "オブジェクトが正常に生成される",
 			args: args{
-				r: testBulletinBoard.repository,
+				r: repository,
 			},
 			want: &BulletinBoardUsecase{
-				Repository: testBulletinBoard.repository,
+				Repository: repository,
 			},
 		},
 	}

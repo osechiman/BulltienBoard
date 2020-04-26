@@ -50,7 +50,7 @@ func (i *InMemoryRepository) AddBulletinBoard(b entities.BulletinBoard) error {
 func (i *InMemoryRepository) ListBulletinBoard() ([]entities.BulletinBoard, error) {
 	var bs []entities.BulletinBoard
 	if len(bulletinBoards) == 0 {
-		return nil, errorobjects.NewNotFoundError("bulletinBoard not registered,")
+		return []entities.BulletinBoard{}, errorobjects.NewNotFoundError("bulletinBoard not registered,")
 	}
 	for _, v := range bulletinBoards {
 		bs = append(bs, v)
@@ -62,7 +62,7 @@ func (i *InMemoryRepository) ListBulletinBoard() ([]entities.BulletinBoard, erro
 func (i *InMemoryRepository) ListThread() ([]entities.Thread, error) {
 	var ts []entities.Thread
 	if len(threads) == 0 {
-		return nil, errorobjects.NewNotFoundError("thread not registered,")
+		return []entities.Thread{}, errorobjects.NewNotFoundError("thread not registered,")
 	}
 	for _, v := range threads {
 		ts = append(ts, v)
@@ -74,7 +74,7 @@ func (i *InMemoryRepository) ListThread() ([]entities.Thread, error) {
 func (i *InMemoryRepository) ListThreadByBulletinBoardID(bID valueobjects.BulletinBoardID) ([]entities.Thread, error) {
 	var ts []entities.Thread
 	if len(threads) == 0 {
-		return nil, errorobjects.NewNotFoundError("thread not registered,")
+		return []entities.Thread{}, errorobjects.NewNotFoundError("thread not registered,")
 	}
 
 	for _, v := range threads {
@@ -84,7 +84,7 @@ func (i *InMemoryRepository) ListThreadByBulletinBoardID(bID valueobjects.Bullet
 	}
 
 	if len(ts) == 0 {
-		return nil, errorobjects.NewNotFoundError(bID.String() + " associated with thread")
+		return []entities.Thread{}, errorobjects.NewNotFoundError(bID.String() + " associated with thread")
 	}
 
 	return ts, nil
@@ -109,7 +109,7 @@ func (i *InMemoryRepository) AddThread(t entities.Thread) error {
 func (i *InMemoryRepository) ListComment() ([]entities.Comment, error) {
 	var cs []entities.Comment
 	if len(comments) == 0 {
-		return nil, errorobjects.NewNotFoundError("comment not registered,")
+		return []entities.Comment{}, errorobjects.NewNotFoundError("comment not registered,")
 	}
 	for _, v := range comments {
 		cs = append(cs, v)
@@ -121,7 +121,7 @@ func (i *InMemoryRepository) ListComment() ([]entities.Comment, error) {
 func (i *InMemoryRepository) ListCommentByThreadID(tID valueobjects.ThreadID) ([]entities.Comment, error) {
 	var cs []entities.Comment
 	if len(comments) == 0 {
-		return nil, errorobjects.NewNotFoundError("comment not registered,")
+		return []entities.Comment{}, errorobjects.NewNotFoundError("comment not registered,")
 	}
 
 	for _, v := range comments {
@@ -131,7 +131,7 @@ func (i *InMemoryRepository) ListCommentByThreadID(tID valueobjects.ThreadID) ([
 	}
 
 	if len(cs) == 0 {
-		return nil, errorobjects.NewNotFoundError(tID.String() + " associated with thread")
+		return []entities.Comment{}, errorobjects.NewNotFoundError(tID.String() + " associated with thread")
 	}
 
 	return cs, nil

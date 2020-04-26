@@ -2,12 +2,17 @@ package usecases
 
 import (
 	"reflect"
+	"sort"
 	"testing"
+	"vspro/adapters/gateways"
 	"vspro/entities"
 	"vspro/entities/valueobjects"
 )
 
 func TestNewThreadUsecase(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
 	type args struct {
 		r ThreadRepositorer
 	}
@@ -19,10 +24,10 @@ func TestNewThreadUsecase(t *testing.T) {
 		{
 			name: "オブジェクトが正常に生成される",
 			args: args{
-				r: testThread.repository,
+				r: repository,
 			},
 			want: &ThreadUsecase{
-				Repository: testThread.repository,
+				Repository: repository,
 			},
 		},
 	}
@@ -36,6 +41,18 @@ func TestNewThreadUsecase(t *testing.T) {
 }
 
 func TestThreadUsecase_AddThread(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+	bid1, _ := valueobjects.NewBulletinBoardID("")
+
+	repository.AddBulletinBoard(b)
+
+	tid, _ := valueobjects.NewThreadID("")
+
 	type fields struct {
 		Repository ThreadRepositorer
 	}
@@ -52,13 +69,32 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 		{
 			name: "エンティティの登録が正常に出来る",
 			fields: fields{
-				Repository: testThread.repository,
+				Repository: repository,
 			},
 			args: args{
-				t:                       entities.Thread{},
-				bulletinBoardRepository: testBulletinBoard.repository,
+				t: entities.Thread{
+					ID:              tid,
+					BulletinBoardID: bid,
+					Title:           "thread",
+				},
+				bulletinBoardRepository: repository,
 			},
 			wantErr: false,
+		},
+		{
+			name: "entities.Threadに指定するBulletinBoardIDがRepositoryに存在しない値だった場合、エラーが返却される",
+			fields: fields{
+				Repository: repository,
+			},
+			args: args{
+				t: entities.Thread{
+					ID:              tid,
+					BulletinBoardID: bid1,
+					Title:           "thread",
+				},
+				bulletinBoardRepository: repository,
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -74,6 +110,24 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 }
 
 func TestThreadUsecase_GetThreadByID(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+	repository.AddBulletinBoard(b)
+
+	tid, _ := valueobjects.NewThreadID("")
+	th, _ := entities.NewThread(tid, bid, "thread")
+
+	repository.AddThread(th)
+
+	tid1, _ := valueobjects.NewThreadID("")
+	th1, _ := entities.NewThread(tid1, bid, "thread2")
+
+	repository.AddThread(th1)
+
 	type fields struct {
 		Repository ThreadRepositorer
 	}
@@ -91,23 +145,28 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 		{
 			name: "ThreadIDからentities.Threadが取得出来る",
 			fields: fields{
-				Repository: testThread.repository,
+				Repository: repository,
 			},
 			args: args{
-				ID:                testThread.tid,
-				commentRepository: testComment.repository,
+				ID:                tid,
+				commentRepository: repository,
 			},
-			want:    entities.Thread{},
+			want: entities.Thread{
+				ID:              tid,
+				BulletinBoardID: bid,
+				Title:           "thread",
+				Comments:        []entities.Comment{},
+			},
 			wantErr: false,
 		},
 		{
-			name: "BulletinBoardIDが存在しない値だった場合、エラーが返却される",
+			name: "ThreadIDが存在しない値だった場合、エラーが返却される",
 			fields: fields{
-				Repository: testThread.repository,
+				Repository: repository,
 			},
 			args: args{
 				ID:                valueobjects.ThreadID{},
-				commentRepository: testComment.repository,
+				commentRepository: repository,
 			},
 			want:    entities.Thread{},
 			wantErr: true,
@@ -131,6 +190,26 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 }
 
 func TestThreadUsecase_ListThread(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+	repository.AddBulletinBoard(b)
+
+	tid, _ := valueobjects.NewThreadID("")
+	th, _ := entities.NewThread(tid, bid, "thread")
+
+	repository.AddThread(th)
+
+	tid1, _ := valueobjects.NewThreadID("")
+	th1, _ := entities.NewThread(tid1, bid, "thread1")
+
+	repository.AddThread(th1)
+
+	ths := append([]entities.Thread{}, th, th1)
+
 	type fields struct {
 		Repository ThreadRepositorer
 	}
@@ -143,9 +222,9 @@ func TestThreadUsecase_ListThread(t *testing.T) {
 		{
 			name: "[]entities.Threadが取得出来る",
 			fields: fields{
-				Repository: testThread.repository,
+				Repository: repository,
 			},
-			want:    []entities.Thread{},
+			want:    ths,
 			wantErr: false,
 		},
 	}
@@ -155,6 +234,15 @@ func TestThreadUsecase_ListThread(t *testing.T) {
 				Repository: tt.fields.Repository,
 			}
 			got, err := tu.ListThread()
+
+			// Sliceの順序はソートせずに返却する仕様なので、テスト時には一度ソートをして値が等価であるかを検証します。
+			sort.Slice(got, func(i, j int) bool {
+				return got[i].ID.String() < got[j].ID.String()
+			})
+			sort.Slice(tt.want, func(i, j int) bool {
+				return tt.want[i].ID.String() < tt.want[j].ID.String()
+			})
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListThread() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -167,6 +255,41 @@ func TestThreadUsecase_ListThread(t *testing.T) {
 }
 
 func TestThreadUsecase_ListThreadByBulletinBoardID(t *testing.T) {
+	repository := gateways.GetInMemoryRepositoryInstance()
+	repository.DeleteAll()
+
+	bid, _ := valueobjects.NewBulletinBoardID("")
+	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
+
+	repository.AddBulletinBoard(b)
+
+	bid1, _ := valueobjects.NewBulletinBoardID("")
+	b1, _ := entities.NewBulletinBoard(bid1, "bulletin board1 title")
+
+	repository.AddBulletinBoard(b1)
+
+	bid2, _ := valueobjects.NewBulletinBoardID("")
+	b2, _ := entities.NewBulletinBoard(bid2, "bulletin board2 title")
+
+	repository.AddBulletinBoard(b2)
+
+	tid, _ := valueobjects.NewThreadID("")
+	th, _ := entities.NewThread(tid, bid2, "thread")
+
+	repository.AddThread(th)
+
+	tid1, _ := valueobjects.NewThreadID("")
+	th1, _ := entities.NewThread(tid1, bid, "thread")
+
+	repository.AddThread(th1)
+
+	tid2, _ := valueobjects.NewThreadID("")
+	th2, _ := entities.NewThread(tid2, bid, "thread2")
+
+	repository.AddThread(th2)
+
+	ths := append([]entities.Thread{}, th1, th2)
+
 	type fields struct {
 		Repository ThreadRepositorer
 	}
@@ -183,13 +306,24 @@ func TestThreadUsecase_ListThreadByBulletinBoardID(t *testing.T) {
 		{
 			name: "BulletinBoardIDから[]entities.Threadが取得出来る",
 			fields: fields{
-				Repository: testThread.repository,
+				Repository: repository,
 			},
 			args: args{
-				bID: testBulletinBoard.bid,
+				bID: bid,
 			},
-			want:    nil,
+			want:    ths,
 			wantErr: false,
+		},
+		{
+			name: "指定するBulletinBoardIDに紐づくThreadが存在しない場合、エラーが返却される",
+			fields: fields{
+				Repository: repository,
+			},
+			args: args{
+				bID: bid1,
+			},
+			want:    []entities.Thread{},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -198,6 +332,15 @@ func TestThreadUsecase_ListThreadByBulletinBoardID(t *testing.T) {
 				Repository: tt.fields.Repository,
 			}
 			got, err := tu.ListThreadByBulletinBoardID(tt.args.bID)
+
+			// Sliceの順序はソートせずに返却する仕様なので、テスト時には一度ソートをして値が等価であるかを検証します。
+			sort.Slice(got, func(i, j int) bool {
+				return got[i].ID.String() < got[j].ID.String()
+			})
+			sort.Slice(tt.want, func(i, j int) bool {
+				return tt.want[i].ID.String() < tt.want[j].ID.String()
+			})
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ListThreadByBulletinBoardID() error = %v, wantErr %v", err, tt.wantErr)
 				return

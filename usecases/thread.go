@@ -49,7 +49,12 @@ func (tu *ThreadUsecase) AddThread(t entities.Thread, bulletinBoardRepository Bu
 
 	ts, err := tu.Repository.ListThread()
 	if err != nil {
-		return err
+		switch err.(type) {
+		// AddThreadにおいては一覧が取得出来なくても登録できる仕様なのでNotFoundErrorは無視します。
+		case *errorobjects.NotFoundError:
+		default:
+			return err
+		}
 	}
 
 	if len(ts) > ThreadLimit {
