@@ -35,11 +35,11 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 	}
 
 	type fields struct {
-		Repository CommentRepositorer
+		CommentRepository CommentRepositorer
+		ThreadRepository  ThreadRepositorer
 	}
 	type args struct {
-		c                entities.Comment
-		threadRepository ThreadRepositorer
+		c entities.Comment
 	}
 	tests := []struct {
 		name    string
@@ -50,18 +50,19 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 		{
 			name: "エンティティの登録が正常に出来る",
 			fields: fields{
-				Repository: repository,
+				CommentRepository: repository,
+				ThreadRepository:  repository,
 			},
 			args: args{
-				c:                c,
-				threadRepository: repository,
+				c: c,
 			},
 			wantErr: false,
 		},
 		{
 			name: "entities.Commentに指定するThreadIDがRepositoryに存在しない値だった場合、エラーが返却される",
 			fields: fields{
-				Repository: repository,
+				CommentRepository: repository,
+				ThreadRepository:  repository,
 			},
 			args: args{
 				c: entities.Comment{
@@ -69,7 +70,6 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 					ThreadID: tid1,
 					Text:     "comment",
 				},
-				threadRepository: repository,
 			},
 			wantErr: true,
 		},
@@ -77,9 +77,10 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cc := &CommentUsecase{
-				Repository: tt.fields.Repository,
+				CommentRepository: tt.fields.CommentRepository,
+				ThreadRepository:  tt.fields.ThreadRepository,
 			}
-			if err := cc.AddComment(tt.args.c, tt.args.threadRepository); (err != nil) != tt.wantErr {
+			if err := cc.AddComment(tt.args.c); (err != nil) != tt.wantErr {
 				t.Errorf("AddComment() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -90,7 +91,8 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 		repository.DeleteAll()
 
 		cc := &CommentUsecase{
-			Repository: repository,
+			CommentRepository: repository,
+			ThreadRepository:  repository,
 		}
 		bid, _ := valueobjects.NewBulletinBoardID("")
 		b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
@@ -116,7 +118,7 @@ func TestCommentUsecase_AddComment(t *testing.T) {
 		c, _ := entities.NewComment(cid, tid, "last comment", ct)
 
 		wantErr := true
-		if err := cc.AddComment(c, repository); (err != nil) != wantErr {
+		if err := cc.AddComment(c); (err != nil) != wantErr {
 			t.Errorf("AddComment() error = %v, wantErr %v", err, wantErr)
 		}
 	})
@@ -151,7 +153,8 @@ func TestCommentUsecase_ListComment(t *testing.T) {
 	want := append([]entities.Comment{}, c, c1)
 
 	type fields struct {
-		Repository CommentRepositorer
+		CommentRepository CommentRepositorer
+		ThreadRepository  ThreadRepositorer
 	}
 	tests := []struct {
 		name    string
@@ -162,7 +165,8 @@ func TestCommentUsecase_ListComment(t *testing.T) {
 		{
 			name: "[]entities.Commentが取得出来る",
 			fields: fields{
-				Repository: repository,
+				CommentRepository: repository,
+				ThreadRepository:  repository,
 			},
 			want:    want,
 			wantErr: false,
@@ -171,7 +175,8 @@ func TestCommentUsecase_ListComment(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cc := &CommentUsecase{
-				Repository: tt.fields.Repository,
+				CommentRepository: tt.fields.CommentRepository,
+				ThreadRepository:  tt.fields.ThreadRepository,
 			}
 			got, err := cc.ListComment()
 
@@ -222,7 +227,8 @@ func TestCommentUsecase_ListCommentByThreadID(t *testing.T) {
 	cs := append([]entities.Comment{}, c)
 
 	type fields struct {
-		Repository CommentRepositorer
+		CommentRepository CommentRepositorer
+		ThreadRepository  ThreadRepositorer
 	}
 	type args struct {
 		tID valueobjects.ThreadID
@@ -237,7 +243,8 @@ func TestCommentUsecase_ListCommentByThreadID(t *testing.T) {
 		{
 			name: "指定するThreadIDに紐づくCommentのみが取得出来る",
 			fields: fields{
-				Repository: repository,
+				CommentRepository: repository,
+				ThreadRepository:  repository,
 			},
 			args: args{
 				tID: tid,
@@ -248,7 +255,8 @@ func TestCommentUsecase_ListCommentByThreadID(t *testing.T) {
 		{
 			name: "指定するThreadIDに紐づくCommentが存在しない場合、エラーが返却される",
 			fields: fields{
-				Repository: repository,
+				CommentRepository: repository,
+				ThreadRepository:  repository,
 			},
 			args: args{
 				tID: tid1,
@@ -260,7 +268,8 @@ func TestCommentUsecase_ListCommentByThreadID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cc := &CommentUsecase{
-				Repository: tt.fields.Repository,
+				CommentRepository: tt.fields.CommentRepository,
+				ThreadRepository:  tt.fields.ThreadRepository,
 			}
 			got, err := cc.ListCommentByThreadID(tt.args.tID)
 			if (err != nil) != tt.wantErr {
@@ -279,7 +288,8 @@ func TestNewCommentUsecase(t *testing.T) {
 	repository.DeleteAll()
 
 	type args struct {
-		r CommentRepositorer
+		CommentRepository CommentRepositorer
+		ThreadRepository  ThreadRepositorer
 	}
 	tests := []struct {
 		name string
@@ -289,16 +299,18 @@ func TestNewCommentUsecase(t *testing.T) {
 		{
 			name: "オブジェクトが正常に生成される",
 			args: args{
-				r: repository,
+				CommentRepository: repository,
+				ThreadRepository:  repository,
 			},
 			want: &CommentUsecase{
-				Repository: repository,
+				CommentRepository: repository,
+				ThreadRepository:  repository,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewCommentUsecase(tt.args.r); !reflect.DeepEqual(got, tt.want) {
+			if got := NewCommentUsecase(tt.args.CommentRepository, tt.args.ThreadRepository); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewCommentUsecase() = %v, want %v", got, tt.want)
 			}
 		})

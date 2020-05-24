@@ -10,23 +10,24 @@ const CommentLimit = 1000
 
 // CommentUsecase はCommentに対するUsecaseを定義するものです。
 type CommentUsecase struct {
-	Repository CommentRepositorer // Repositorer は外部データソースに存在するentities.Commentを操作する際に利用するインターフェースです。
+	CommentRepository CommentRepositorer // Repositorer は外部データソースに存在するentities.Commentを操作する際に利用するインターフェースです。
+	ThreadRepository  ThreadRepositorer  // ThreadRepositorer は外部データソースに存在するentities.Threadを操作する際に利用するインターフェースです。
 }
 
 // NewCommentUsecase はCommentUsecaseを初期化します。
-func NewCommentUsecase(r CommentRepositorer) *CommentUsecase {
-	return &CommentUsecase{Repository: r}
+func NewCommentUsecase(cr CommentRepositorer, tr ThreadRepositorer) *CommentUsecase {
+	return &CommentUsecase{CommentRepository: cr, ThreadRepository: tr}
 }
 
 // AddComment は自信が持つThreadIDのThreadが存在するかをチェックし、
 // 現在登録されているCommentの数を確認して閾値に達成していなければentities.Commentを追加します。
-func (cc *CommentUsecase) AddComment(c entities.Comment, threadRepository ThreadRepositorer) error {
-	_, err := threadRepository.GetThreadByID(c.ThreadID.Get())
+func (cc *CommentUsecase) AddComment(c entities.Comment) error {
+	_, err := cc.ThreadRepository.GetThreadByID(c.ThreadID.Get())
 	if err != nil {
 		return err
 	}
 
-	cs, err := cc.Repository.ListComment()
+	cs, err := cc.CommentRepository.ListComment()
 	if err != nil {
 		switch err.(type) {
 		// AddCommentにおいては一覧が取得出来なくても登録できる仕様なのでNotFoundErrorは無視します。
@@ -40,15 +41,15 @@ func (cc *CommentUsecase) AddComment(c entities.Comment, threadRepository Thread
 		return errorobjects.NewResourceLimitedError("maximum number of comment exceeded. comment limit is " + string(CommentLimit))
 	}
 
-	return cc.Repository.AddComment(c)
+	return cc.CommentRepository.AddComment(c)
 }
 
 // ListComment はentities.Commentの一覧を取得します。
 func (cc *CommentUsecase) ListComment() ([]entities.Comment, error) {
-	return cc.Repository.ListComment()
+	return cc.CommentRepository.ListComment()
 }
 
 // ListCommentByThreadID は指定されたvalueobjects.ThreadIDを持つentities.Commentの一覧を取得します。
 func (cc *CommentUsecase) ListCommentByThreadID(tID valueobjects.ThreadID) ([]entities.Comment, error) {
-	return cc.Repository.ListCommentByThreadID(tID)
+	return cc.CommentRepository.ListCommentByThreadID(tID)
 }

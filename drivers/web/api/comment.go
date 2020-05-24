@@ -3,7 +3,6 @@ package api
 import (
 	"net/http"
 	"vspro/adapters/controllers"
-	"vspro/adapters/gateways"
 	"vspro/adapters/presenters"
 
 	"github.com/gin-gonic/gin"
@@ -11,15 +10,14 @@ import (
 
 // postComment はPostされてきたComment(json)を保存します。
 func postComment(c *gin.Context) {
-	cr := gateways.GetInMemoryRepositoryInstance()
-	cp := presenters.NewCommentPresenter()
-	cc := controllers.NewCommentController(cr)
+	cc := controllers.NewCommentController()
 	cm, err := cc.AddComment(c)
 	if err != nil {
 		responseByError(c, err)
 		return
 	}
 
+	cp := presenters.NewCommentPresenter()
 	res := cp.ConvertToHttpCommentResponse(cm)
 	c.JSON(http.StatusCreated, res)
 	return
@@ -27,15 +25,14 @@ func postComment(c *gin.Context) {
 
 // listComment はCommentの一覧をjsonで出力します。
 func listComment(c *gin.Context) {
-	r := gateways.GetInMemoryRepositoryInstance()
-	cp := presenters.NewCommentPresenter()
-	cc := controllers.NewCommentController(r)
+	cc := controllers.NewCommentController()
 	cl, err := cc.ListComment()
 	if err != nil {
 		responseByError(c, err)
 		return
 	}
 
+	cp := presenters.NewCommentPresenter()
 	res := cp.ConvertToHttpCommentListResponse(cl)
 	c.JSON(http.StatusOK, res)
 	return

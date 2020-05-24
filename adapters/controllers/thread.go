@@ -1,11 +1,10 @@
 package controllers
 
 import (
-	"vspro/adapters/gateways"
+	"vspro/adapters/middlewares/di"
 	"vspro/entities"
 	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
-	"vspro/usecases"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -13,11 +12,7 @@ import (
 
 // ThreadController はThreadRepositorerのコントローラーです。
 // 初期化時に渡すリポジトリ以外を利用したい場合はそれぞれメソッドの引数で受け取ってください。
-type ThreadController struct {
-	// Repository はこのコントローラーで利用するメインのリポジトリです。
-	// このコントローラーで利用するメインのリポジトリです。
-	Repository usecases.ThreadRepositorer
-}
+type ThreadController struct{}
 
 // Thread はリクエストされてきたPost値を受け取る為のStructです。
 type Thread struct {
@@ -27,20 +22,20 @@ type Thread struct {
 }
 
 // NewThreadController はThreadControllerを初期化します。
-func NewThreadController(r usecases.ThreadRepositorer) *ThreadController {
-	return &ThreadController{Repository: r}
+func NewThreadController() *ThreadController {
+	return &ThreadController{}
 }
 
 // GetThreadByID はThreadIDからThreadを取得します。
 func (tc *ThreadController) GetThreadByID(ID string) (entities.Thread, error) {
-	tu := usecases.NewThreadUsecase(tc.Repository)
+	tu := di.GetThreadUsecase()
 
 	tid, err := convertIDToThreadID(ID)
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	return tu.GetThreadByID(tid, gateways.GetInMemoryRepositoryInstance())
+	return tu.GetThreadByID(tid)
 }
 
 // AddThread はPostされてきたデータを元にThreadを追加します。
@@ -74,13 +69,13 @@ func (tc *ThreadController) AddThread(c *gin.Context) (entities.Thread, error) {
 		return entities.Thread{}, err
 	}
 
-	tu := usecases.NewThreadUsecase(tc.Repository)
-	return t, tu.AddThread(t, gateways.GetInMemoryRepositoryInstance())
+	tu := di.GetThreadUsecase()
+	return t, tu.AddThread(t)
 }
 
 // ListThread はThreadの一覧を取得します。
 func (tc *ThreadController) ListThread() ([]entities.Thread, error) {
-	tu := usecases.NewThreadUsecase(tc.Repository)
+	tu := di.GetThreadUsecase()
 	return tu.ListThread()
 }
 
@@ -90,7 +85,7 @@ func (tc *ThreadController) ListThreadByBulletinBoardID(bID string) ([]entities.
 	if err != nil {
 		return nil, err
 	}
-	tu := usecases.NewThreadUsecase(tc.Repository)
+	tu := di.GetThreadUsecase()
 	return tu.ListThreadByBulletinBoardID(bid)
 }
 
