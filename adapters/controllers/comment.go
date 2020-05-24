@@ -1,11 +1,10 @@
 package controllers
 
 import (
-	"vspro/adapters/gateways"
+	"vspro/adapters/middlewares/di"
 	"vspro/entities"
 	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
-	"vspro/usecases"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -13,11 +12,7 @@ import (
 
 // CommentController はCommentRepositorerのコントローラーです。
 // 初期化時に渡すリポジトリ以外を利用したい場合はそれぞれメソッドの引数で受け取ってください。
-type CommentController struct {
-	// Repository はこのコントローラーで利用するメインのリポジトリです。
-	// このコントローラーで利用するメインのリポジトリです。
-	Repository usecases.CommentRepositorer
-}
+type CommentController struct{}
 
 // Comment はリクエストされてきたPost値を受け取る為のStructです。
 type Comment struct {
@@ -27,8 +22,8 @@ type Comment struct {
 }
 
 // NewCommentController はCommentControllerを初期化します。
-func NewCommentController(r usecases.CommentRepositorer) *CommentController {
-	return &CommentController{Repository: r}
+func NewCommentController() *CommentController {
+	return &CommentController{}
 }
 
 // AddComment はPostされてきたデータを元にCommentを追加します。
@@ -66,13 +61,13 @@ func (cc *CommentController) AddComment(c *gin.Context) (entities.Comment, error
 		return entities.Comment{}, err
 	}
 
-	cu := usecases.NewCommentUsecase(cc.Repository)
-	return cm, cu.AddComment(cm, gateways.GetInMemoryRepositoryInstance())
+	cu := di.GetCommentUsecase()
+	return cm, cu.AddComment(cm)
 }
 
 // ListComment はCommentの一覧を取得します。
 func (cc *CommentController) ListComment() ([]entities.Comment, error) {
-	tu := usecases.NewCommentUsecase(cc.Repository)
+	tu := di.GetCommentUsecase()
 	return tu.ListComment()
 }
 
@@ -82,7 +77,7 @@ func (cc *CommentController) ListCommentByThreadID(tID string) ([]entities.Comme
 	if err != nil {
 		return nil, err
 	}
-	tu := usecases.NewCommentUsecase(cc.Repository)
+	tu := di.GetCommentUsecase()
 	return tu.ListCommentByThreadID(tid)
 }
 

@@ -10,17 +10,18 @@ const BulletinBoardLimit = 50
 
 // BulletinBoardUsecase はBulletinBoardに対するUsecaseを定義するものです。
 type BulletinBoardUsecase struct {
-	Repository BulletinBoardRepositorer // Repository は外部データソースに存在するentities.BulletinBoardを操作する際に利用するインターフェースです。
+	BulletinBoardRepository BulletinBoardRepositorer // BulletinBoardRepository は外部データソースに存在するentities.BulletinBoardを操作する際に利用するインターフェースです。
+	ThreadRepository        ThreadRepositorer        // ThreadRepositorer は外部データソースに存在するentities.Threadを操作する際に利用するインターフェースです。
 }
 
 // NewBulletinBoardUsecase はBulletinBoardUsecaseを初期化します。
-func NewBulletinBoardUsecase(r BulletinBoardRepositorer) *BulletinBoardUsecase {
-	return &BulletinBoardUsecase{Repository: r}
+func NewBulletinBoardUsecase(br BulletinBoardRepositorer, tr ThreadRepositorer) *BulletinBoardUsecase {
+	return &BulletinBoardUsecase{BulletinBoardRepository: br, ThreadRepository: tr}
 }
 
 // GetBulletinBoardByID は指定されたvalueobjects.BulletinBoardIDを持つentities.BulletinBoardを取得します。
-func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBoardID, threadRepository ThreadRepositorer) (entities.BulletinBoard, error) {
-	tl, err := threadRepository.ListThreadByBulletinBoardID(ID)
+func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBoardID) (entities.BulletinBoard, error) {
+	tl, err := bbu.ThreadRepository.ListThreadByBulletinBoardID(ID)
 	if err != nil {
 		switch err.(type) {
 		case *errorobjects.NotFoundError:
@@ -30,7 +31,7 @@ func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBo
 		}
 	}
 
-	b, err := bbu.Repository.GetBulletinBoardByID(ID)
+	b, err := bbu.BulletinBoardRepository.GetBulletinBoardByID(ID)
 	if err != nil {
 		return entities.BulletinBoard{}, err
 	}
@@ -41,7 +42,7 @@ func (bbu *BulletinBoardUsecase) GetBulletinBoardByID(ID valueobjects.BulletinBo
 
 // AddBulletinBoard は現在登録されているBulletinBoardの数を確認して、閾値に達成していなければentities.BulletinBoardを追加します。
 func (bbu *BulletinBoardUsecase) AddBulletinBoard(bb entities.BulletinBoard) error {
-	bbs, err := bbu.Repository.ListBulletinBoard()
+	bbs, err := bbu.BulletinBoardRepository.ListBulletinBoard()
 	if err != nil {
 		switch err.(type) {
 		// NotFoundErrorの場合は処理を中断しない
@@ -55,10 +56,10 @@ func (bbu *BulletinBoardUsecase) AddBulletinBoard(bb entities.BulletinBoard) err
 		return errorobjects.NewResourceLimitedError("maximum number of bulletin boards exceeded")
 	}
 
-	return bbu.Repository.AddBulletinBoard(bb)
+	return bbu.BulletinBoardRepository.AddBulletinBoard(bb)
 }
 
 // ListBulletinBoard はentities.BulletinBoardの一覧を取得します。
 func (bbu *BulletinBoardUsecase) ListBulletinBoard() ([]entities.BulletinBoard, error) {
-	return bbu.Repository.ListBulletinBoard()
+	return bbu.BulletinBoardRepository.ListBulletinBoard()
 }

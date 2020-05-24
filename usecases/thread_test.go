@@ -14,7 +14,9 @@ func TestNewThreadUsecase(t *testing.T) {
 	repository.DeleteAll()
 
 	type args struct {
-		r ThreadRepositorer
+		tr ThreadRepositorer
+		br BulletinBoardRepositorer
+		cr CommentRepositorer
 	}
 	tests := []struct {
 		name string
@@ -24,16 +26,20 @@ func TestNewThreadUsecase(t *testing.T) {
 		{
 			name: "オブジェクトが正常に生成される",
 			args: args{
-				r: repository,
+				tr: repository,
+				br: repository,
+				cr: repository,
 			},
 			want: &ThreadUsecase{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewThreadUsecase(tt.args.r); !reflect.DeepEqual(got, tt.want) {
+			if got := NewThreadUsecase(tt.args.tr, tt.args.br, tt.args.cr); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewThreadUsecase() = %v, want %v", got, tt.want)
 			}
 		})
@@ -54,11 +60,12 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 	tid, _ := valueobjects.NewThreadID("")
 
 	type fields struct {
-		Repository ThreadRepositorer
+		ThreadRepository        ThreadRepositorer
+		BulletinBoardRepository BulletinBoardRepositorer
+		CommentRepository       CommentRepositorer
 	}
 	type args struct {
-		t                       entities.Thread
-		bulletinBoardRepository BulletinBoardRepositorer
+		t entities.Thread
 	}
 	tests := []struct {
 		name    string
@@ -69,7 +76,9 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 		{
 			name: "エンティティの登録が正常に出来る",
 			fields: fields{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 			args: args{
 				t: entities.Thread{
@@ -77,14 +86,15 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 					BulletinBoardID: bid,
 					Title:           "thread",
 				},
-				bulletinBoardRepository: repository,
 			},
 			wantErr: false,
 		},
 		{
 			name: "entities.Threadに指定するBulletinBoardIDがRepositoryに存在しない値だった場合、エラーが返却される",
 			fields: fields{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 			args: args{
 				t: entities.Thread{
@@ -92,7 +102,6 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 					BulletinBoardID: bid1,
 					Title:           "thread",
 				},
-				bulletinBoardRepository: repository,
 			},
 			wantErr: true,
 		},
@@ -100,9 +109,11 @@ func TestThreadUsecase_AddThread(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tu := &ThreadUsecase{
-				Repository: tt.fields.Repository,
+				ThreadRepository:        tt.fields.ThreadRepository,
+				BulletinBoardRepository: tt.fields.BulletinBoardRepository,
+				CommentRepository:       tt.fields.CommentRepository,
 			}
-			if err := tu.AddThread(tt.args.t, tt.args.bulletinBoardRepository); (err != nil) != tt.wantErr {
+			if err := tu.AddThread(tt.args.t); (err != nil) != tt.wantErr {
 				t.Errorf("AddThread() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
@@ -129,11 +140,12 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 	repository.AddThread(th1)
 
 	type fields struct {
-		Repository ThreadRepositorer
+		ThreadRepository        ThreadRepositorer
+		BulletinBoardRepository BulletinBoardRepositorer
+		CommentRepository       CommentRepositorer
 	}
 	type args struct {
-		ID                valueobjects.ThreadID
-		commentRepository CommentRepositorer
+		ID valueobjects.ThreadID
 	}
 	tests := []struct {
 		name    string
@@ -145,11 +157,12 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 		{
 			name: "ThreadIDからentities.Threadが取得出来る",
 			fields: fields{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 			args: args{
-				ID:                tid,
-				commentRepository: repository,
+				ID: tid,
 			},
 			want: entities.Thread{
 				ID:              tid,
@@ -162,11 +175,12 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 		{
 			name: "ThreadIDが存在しない値だった場合、エラーが返却される",
 			fields: fields{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 			args: args{
-				ID:                valueobjects.ThreadID{},
-				commentRepository: repository,
+				ID: valueobjects.ThreadID{},
 			},
 			want:    entities.Thread{},
 			wantErr: true,
@@ -175,9 +189,11 @@ func TestThreadUsecase_GetThreadByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tu := &ThreadUsecase{
-				Repository: tt.fields.Repository,
+				ThreadRepository:        tt.fields.ThreadRepository,
+				BulletinBoardRepository: tt.fields.BulletinBoardRepository,
+				CommentRepository:       tt.fields.CommentRepository,
 			}
-			got, err := tu.GetThreadByID(tt.args.ID, tt.args.commentRepository)
+			got, err := tu.GetThreadByID(tt.args.ID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetThreadByID() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -211,7 +227,9 @@ func TestThreadUsecase_ListThread(t *testing.T) {
 	ths := append([]entities.Thread{}, th, th1)
 
 	type fields struct {
-		Repository ThreadRepositorer
+		ThreadRepository        ThreadRepositorer
+		BulletinBoardRepository BulletinBoardRepositorer
+		CommentRepository       CommentRepositorer
 	}
 	tests := []struct {
 		name    string
@@ -222,7 +240,9 @@ func TestThreadUsecase_ListThread(t *testing.T) {
 		{
 			name: "[]entities.Threadが取得出来る",
 			fields: fields{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 			want:    ths,
 			wantErr: false,
@@ -231,7 +251,9 @@ func TestThreadUsecase_ListThread(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tu := &ThreadUsecase{
-				Repository: tt.fields.Repository,
+				ThreadRepository:        tt.fields.ThreadRepository,
+				BulletinBoardRepository: tt.fields.BulletinBoardRepository,
+				CommentRepository:       tt.fields.CommentRepository,
 			}
 			got, err := tu.ListThread()
 
@@ -291,7 +313,9 @@ func TestThreadUsecase_ListThreadByBulletinBoardID(t *testing.T) {
 	ths := append([]entities.Thread{}, th1, th2)
 
 	type fields struct {
-		Repository ThreadRepositorer
+		ThreadRepository        ThreadRepositorer
+		BulletinBoardRepository BulletinBoardRepositorer
+		CommentRepository       CommentRepositorer
 	}
 	type args struct {
 		bID valueobjects.BulletinBoardID
@@ -306,7 +330,9 @@ func TestThreadUsecase_ListThreadByBulletinBoardID(t *testing.T) {
 		{
 			name: "BulletinBoardIDから[]entities.Threadが取得出来る",
 			fields: fields{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 			args: args{
 				bID: bid,
@@ -317,7 +343,9 @@ func TestThreadUsecase_ListThreadByBulletinBoardID(t *testing.T) {
 		{
 			name: "指定するBulletinBoardIDに紐づくThreadが存在しない場合、エラーが返却される",
 			fields: fields{
-				Repository: repository,
+				ThreadRepository:        repository,
+				BulletinBoardRepository: repository,
+				CommentRepository:       repository,
 			},
 			args: args{
 				bID: bid1,
@@ -329,7 +357,9 @@ func TestThreadUsecase_ListThreadByBulletinBoardID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tu := &ThreadUsecase{
-				Repository: tt.fields.Repository,
+				ThreadRepository:        tt.fields.ThreadRepository,
+				BulletinBoardRepository: tt.fields.BulletinBoardRepository,
+				CommentRepository:       tt.fields.CommentRepository,
 			}
 			got, err := tu.ListThreadByBulletinBoardID(tt.args.bID)
 

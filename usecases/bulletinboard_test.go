@@ -17,7 +17,8 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
 
 	type fields struct {
-		Repository BulletinBoardRepositorer
+		BulletinBoardRepository BulletinBoardRepositorer
+		ThreadRepository        ThreadRepositorer
 	}
 	type args struct {
 		bb entities.BulletinBoard
@@ -31,7 +32,7 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 		{
 			name: "エンティティの登録が正常に出来る",
 			fields: fields{
-				Repository: repository,
+				BulletinBoardRepository: repository,
 			},
 			args: args{
 				bb: b,
@@ -42,7 +43,7 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bbu := &BulletinBoardUsecase{
-				Repository: tt.fields.Repository,
+				BulletinBoardRepository: tt.fields.BulletinBoardRepository,
 			}
 			if err := bbu.AddBulletinBoard(tt.args.bb); (err != nil) != tt.wantErr {
 				t.Errorf("AddBulletinBoard() error = %v, wantErr %v", err, tt.wantErr)
@@ -53,7 +54,7 @@ func TestBulletinBoardUsecase_AddBulletinBoard(t *testing.T) {
 	t.Run("BulletinBoardの登録数がBulletinBoardLimitを超えて登録された場合、エラーが返却される", func(t *testing.T) {
 		repository.DeleteAll()
 		bbu := &BulletinBoardUsecase{
-			Repository: repository,
+			BulletinBoardRepository: repository,
 		}
 		for i := 0; i < BulletinBoardLimit; i++ {
 			bid, _ = valueobjects.NewBulletinBoardID("")
@@ -80,11 +81,11 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 	b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
 	repository.AddBulletinBoard(b)
 	type fields struct {
-		Repository BulletinBoardRepositorer
+		BulletinBoardRepository BulletinBoardRepositorer
+		ThreadRepository        ThreadRepositorer
 	}
 	type args struct {
-		ID               valueobjects.BulletinBoardID
-		threadRepository ThreadRepositorer
+		ID valueobjects.BulletinBoardID
 	}
 	tests := []struct {
 		name    string
@@ -96,11 +97,11 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 		{
 			name: "BulletinBoardIDからentities.BulletinBoardが取得出来る",
 			fields: fields{
-				Repository: repository,
+				BulletinBoardRepository: repository,
+				ThreadRepository:        repository,
 			},
 			args: args{
-				ID:               bid,
-				threadRepository: repository,
+				ID: bid,
 			},
 			want: entities.BulletinBoard{
 				ID:      bid,
@@ -112,11 +113,11 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 		{
 			name: "BulletinBoardIDが存在しない値だった場合、エラーが返却される",
 			fields: fields{
-				Repository: repository,
+				BulletinBoardRepository: repository,
+				ThreadRepository:        repository,
 			},
 			args: args{
-				ID:               valueobjects.BulletinBoardID{},
-				threadRepository: repository,
+				ID: valueobjects.BulletinBoardID{},
 			},
 			want:    entities.BulletinBoard{},
 			wantErr: true,
@@ -125,9 +126,10 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bbu := &BulletinBoardUsecase{
-				Repository: tt.fields.Repository,
+				BulletinBoardRepository: tt.fields.BulletinBoardRepository,
+				ThreadRepository:        tt.fields.ThreadRepository,
 			}
-			got, err := bbu.GetBulletinBoardByID(tt.args.ID, tt.args.threadRepository)
+			got, err := bbu.GetBulletinBoardByID(tt.args.ID)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("GetBulletinBoardByID() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -143,7 +145,8 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 		bid, _ = valueobjects.NewBulletinBoardID("")
 		b, _ := entities.NewBulletinBoard(bid, "bulletin board title")
 		bbu := &BulletinBoardUsecase{
-			Repository: repository,
+			BulletinBoardRepository: repository,
+			ThreadRepository:        repository,
 		}
 		repository.AddBulletinBoard(b)
 
@@ -155,7 +158,7 @@ func TestBulletinBoardUsecase_GetBulletinBoardByID(t *testing.T) {
 		b.Threads = append(b.Threads, th)
 		want := b
 
-		got, err := bbu.GetBulletinBoardByID(bid, repository)
+		got, err := bbu.GetBulletinBoardByID(bid)
 		if (err != nil) != wantErr {
 			t.Errorf("GetBulletinBoardByID() error = %v, wantErr %v", err, wantErr)
 			return
@@ -181,7 +184,8 @@ func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
 	want := append([]entities.BulletinBoard{}, b, b1)
 
 	type fields struct {
-		Repository BulletinBoardRepositorer
+		BulletinBoardRepository BulletinBoardRepositorer
+		ThreadRepository        ThreadRepositorer
 	}
 	tests := []struct {
 		name    string
@@ -192,7 +196,7 @@ func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
 		{
 			name: "[]entities.BulletinBoardが取得出来る",
 			fields: fields{
-				Repository: repository,
+				BulletinBoardRepository: repository,
 			},
 			want:    want,
 			wantErr: false,
@@ -201,7 +205,7 @@ func TestBulletinBoardUsecase_ListBulletinBoard(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			bbu := &BulletinBoardUsecase{
-				Repository: tt.fields.Repository,
+				BulletinBoardRepository: tt.fields.BulletinBoardRepository,
 			}
 			got, err := bbu.ListBulletinBoard()
 			if (err != nil) != tt.wantErr {
@@ -228,7 +232,8 @@ func TestNewBulletinBoardUsecase(t *testing.T) {
 	repository.DeleteAll()
 
 	type args struct {
-		r BulletinBoardRepositorer
+		br BulletinBoardRepositorer
+		tr ThreadRepositorer
 	}
 	tests := []struct {
 		name string
@@ -238,16 +243,18 @@ func TestNewBulletinBoardUsecase(t *testing.T) {
 		{
 			name: "オブジェクトが正常に生成される",
 			args: args{
-				r: repository,
+				br: repository,
+				tr: repository,
 			},
 			want: &BulletinBoardUsecase{
-				Repository: repository,
+				BulletinBoardRepository: repository,
+				ThreadRepository:        repository,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewBulletinBoardUsecase(tt.args.r); !reflect.DeepEqual(got, tt.want) {
+			if got := NewBulletinBoardUsecase(tt.args.br, tt.args.tr); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("NewBulletinBoardUsecase() = %v, want %v", got, tt.want)
 			}
 		})
