@@ -2,54 +2,46 @@ package api
 
 import (
 	"net/http"
-	"vspro/adapters/controllers"
-	"vspro/adapters/presenters"
 
 	"github.com/gin-gonic/gin"
 )
 
 // listBulletinBoard はBulletinBoardの一覧をjsonで出力します。
-func listBulletinBoard(c *gin.Context) {
-	bbc := controllers.NewBulletinBoardController()
-	bbl, err := bbc.ListBulletinBoard()
+func (r *Router) listBulletinBoard(c *gin.Context) {
+	bbl, err := r.BulletinBoardController.ListBulletinBoard()
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	bbp := presenters.NewBulletinBoardPresenter()
-	res := bbp.ConvertToHttpBulletinBoardListResponse(bbl)
+	res := r.BulletinBoardPresenter.ConvertToHttpBulletinBoardListResponse(bbl)
 	c.JSON(http.StatusOK, res)
 	return
 }
 
 // getBulletinBoardByID 指定したIDのBulletinBoardをjsonで出力します。
-func getBulletinBoardByID(c *gin.Context) {
+func (r *Router) getBulletinBoardByID(c *gin.Context) {
 	bbid := c.Param("id")
-	bbc := controllers.NewBulletinBoardController()
-	bb, err := bbc.GetBulletinBoardByID(bbid)
+	bb, err := r.BulletinBoardController.GetBulletinBoardByID(bbid)
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	bbp := presenters.NewBulletinBoardPresenter()
-	res := bbp.ConvertToHttpBulletinBoardResponse(bb)
+	res := r.BulletinBoardPresenter.ConvertToHttpBulletinBoardResponse(bb)
 	c.JSON(http.StatusOK, res)
 	return
 }
 
 // postBulletinBoard はPostされてきたBulletinBoard(json)を保存します。
-func postBulletinBoard(c *gin.Context) {
-	bbc := controllers.NewBulletinBoardController()
-	bb, err := bbc.AddBulletinBoard(c)
+func (r *Router) postBulletinBoard(c *gin.Context) {
+	bb, err := r.BulletinBoardController.AddBulletinBoard(c)
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	bbp := presenters.NewBulletinBoardPresenter()
-	res := bbp.ConvertToHttpBulletinBoardResponse(bb)
+	res := r.BulletinBoardPresenter.ConvertToHttpBulletinBoardResponse(bb)
 	c.JSON(http.StatusCreated, res)
 	return
 }

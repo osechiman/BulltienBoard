@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"vspro/adapters/controllers"
 	"vspro/adapters/middlewares/logger"
 	"vspro/adapters/presenters"
 	"vspro/drivers/configs"
@@ -10,8 +11,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type Router struct {
+	BulletinBoardController *controllers.BulletinBoardController
+	BulletinBoardPresenter  *presenters.BulletinBoardPresenter
+	ThreadController        *controllers.ThreadController
+	ThreadPresenter         *presenters.ThreadPresenter
+	CommentController       *controllers.CommentController
+	CommentPresenter        *presenters.CommentPresenter
+	ErrorPresenter          *presenters.ErrorPresenter
+}
+
+func NewRouter(bulletinBoardController *controllers.BulletinBoardController,
+	bulletinBoardPresenter *presenters.BulletinBoardPresenter,
+	threadController *controllers.ThreadController,
+	threadPresenter *presenters.ThreadPresenter,
+	commentController *controllers.CommentController,
+	commentPresenter *presenters.CommentPresenter,
+	errorPresenter *presenters.ErrorPresenter) *Router {
+	return &Router{BulletinBoardController: bulletinBoardController,
+		BulletinBoardPresenter: bulletinBoardPresenter,
+		ThreadController:       threadController,
+		ThreadPresenter:        threadPresenter,
+		CommentController:      commentController,
+		CommentPresenter:       commentPresenter,
+		ErrorPresenter:         errorPresenter,
+	}
+}
+
 // Listen はAPIがリクエストを受け取れる様に待機状態にします。
-func Listen() {
+func Listen(r *Router) {
 	gin.DisableConsoleColor()
 
 	c := configs.GetOsConfigInstance()
@@ -33,22 +61,22 @@ func Listen() {
 		{
 			bulletinBoards := v1.Group("/bulletinBoards")
 			{
-				bulletinBoards.GET("", listBulletinBoard)
-				bulletinBoards.GET("/:id", getBulletinBoardByID)
-				bulletinBoards.POST("", postBulletinBoard)
+				bulletinBoards.GET("", r.listBulletinBoard)
+				bulletinBoards.GET("/:id", r.getBulletinBoardByID)
+				bulletinBoards.POST("", r.postBulletinBoard)
 			}
 
 			threads := v1.Group("/threads")
 			{
-				threads.GET("", listThread)
-				threads.GET("/:id", getThreadByID)
-				threads.POST("", postThread)
+				threads.GET("", r.listThread)
+				threads.GET("/:id", r.getThreadByID)
+				threads.POST("", r.postThread)
 			}
 
 			comments := v1.Group("/comments")
 			{
-				comments.GET("", listComment)
-				comments.POST("", postComment)
+				comments.GET("", r.listComment)
+				comments.POST("", r.postComment)
 			}
 		}
 	}
@@ -57,27 +85,26 @@ func Listen() {
 }
 
 // responseByError はerrorobjectsのType毎にjsonを出力します。
-func responseByError(c *gin.Context, err error) {
-	ep := presenters.NewErrorPresenter()
+func (r *Router) responseByError(c *gin.Context, err error) {
 	if err != nil {
 		switch t := err.(type) {
 		case *errorobjects.NotFoundError:
-			c.JSON(http.StatusNotFound, ep.ConvertToHttpErrorResponse(http.StatusNotFound, t))
+			c.JSON(http.StatusNotFound, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusNotFound, t))
 			logger.GetLoggerColumns(c).Debug(c, t.Error())
 		case *errorobjects.MissingRequiredFieldsError:
-			c.JSON(http.StatusBadRequest, ep.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
+			c.JSON(http.StatusBadRequest, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.ParameterBindingError:
-			c.JSON(http.StatusBadRequest, ep.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
+			c.JSON(http.StatusBadRequest, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.CharacterSizeValidationError:
-			c.JSON(http.StatusBadRequest, ep.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
+			c.JSON(http.StatusBadRequest, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.ResourceLimitedError:
-			c.JSON(http.StatusInsufficientStorage, ep.ConvertToHttpErrorResponse(http.StatusInsufficientStorage, t))
+			c.JSON(http.StatusInsufficientStorage, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusInsufficientStorage, t))
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		default:
-			c.JSON(http.StatusInternalServerError, ep.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
+			c.JSON(http.StatusInternalServerError, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
 			logger.GetLoggerColumns(c).Error(c, t.Error())
 		}
 	}

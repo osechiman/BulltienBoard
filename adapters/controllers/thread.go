@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"vspro/adapters/middlewares/di"
 	"vspro/entities"
 	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
+	"vspro/usecases"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -12,7 +12,9 @@ import (
 
 // ThreadController はThreadRepositorerのコントローラーです。
 // 初期化時に渡すリポジトリ以外を利用したい場合はそれぞれメソッドの引数で受け取ってください。
-type ThreadController struct{}
+type ThreadController struct {
+	tu *usecases.ThreadUsecase
+}
 
 // Thread はリクエストされてきたPost値を受け取る為のStructです。
 type Thread struct {
@@ -22,20 +24,18 @@ type Thread struct {
 }
 
 // NewThreadController はThreadControllerを初期化します。
-func NewThreadController() *ThreadController {
-	return &ThreadController{}
+func NewThreadController(tu *usecases.ThreadUsecase) *ThreadController {
+	return &ThreadController{tu: tu}
 }
 
 // GetThreadByID はThreadIDからThreadを取得します。
 func (tc *ThreadController) GetThreadByID(ID string) (entities.Thread, error) {
-	tu := di.GetThreadUsecase()
-
 	tid, err := convertIDToThreadID(ID)
 	if err != nil {
 		return entities.Thread{}, err
 	}
 
-	return tu.GetThreadByID(tid)
+	return tc.tu.GetThreadByID(tid)
 }
 
 // AddThread はPostされてきたデータを元にThreadを追加します。
@@ -69,14 +69,12 @@ func (tc *ThreadController) AddThread(c *gin.Context) (entities.Thread, error) {
 		return entities.Thread{}, err
 	}
 
-	tu := di.GetThreadUsecase()
-	return t, tu.AddThread(t)
+	return t, tc.tu.AddThread(t)
 }
 
 // ListThread はThreadの一覧を取得します。
 func (tc *ThreadController) ListThread() ([]entities.Thread, error) {
-	tu := di.GetThreadUsecase()
-	return tu.ListThread()
+	return tc.tu.ListThread()
 }
 
 // ListThreadByBulletinBoardID は指定されたBulletinBoardIDを持つThread一覧を取得します。
@@ -85,8 +83,7 @@ func (tc *ThreadController) ListThreadByBulletinBoardID(bID string) ([]entities.
 	if err != nil {
 		return nil, err
 	}
-	tu := di.GetThreadUsecase()
-	return tu.ListThreadByBulletinBoardID(bid)
+	return tc.tu.ListThreadByBulletinBoardID(bid)
 }
 
 // convertIDToThreadID は文字列のThreadIDをvalueobjects.ThreadIDに変換します。

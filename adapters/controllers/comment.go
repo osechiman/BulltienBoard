@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"vspro/adapters/middlewares/di"
 	"vspro/entities"
 	"vspro/entities/errorobjects"
 	"vspro/entities/valueobjects"
+	"vspro/usecases"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"
@@ -12,7 +12,9 @@ import (
 
 // CommentController はCommentRepositorerのコントローラーです。
 // 初期化時に渡すリポジトリ以外を利用したい場合はそれぞれメソッドの引数で受け取ってください。
-type CommentController struct{}
+type CommentController struct {
+	cu *usecases.CommentUsecase
+}
 
 // Comment はリクエストされてきたPost値を受け取る為のStructです。
 type Comment struct {
@@ -22,8 +24,8 @@ type Comment struct {
 }
 
 // NewCommentController はCommentControllerを初期化します。
-func NewCommentController() *CommentController {
-	return &CommentController{}
+func NewCommentController(cu *usecases.CommentUsecase) *CommentController {
+	return &CommentController{cu: cu}
 }
 
 // AddComment はPostされてきたデータを元にCommentを追加します。
@@ -61,14 +63,12 @@ func (cc *CommentController) AddComment(c *gin.Context) (entities.Comment, error
 		return entities.Comment{}, err
 	}
 
-	cu := di.GetCommentUsecase()
-	return cm, cu.AddComment(cm)
+	return cm, cc.cu.AddComment(cm)
 }
 
 // ListComment はCommentの一覧を取得します。
 func (cc *CommentController) ListComment() ([]entities.Comment, error) {
-	tu := di.GetCommentUsecase()
-	return tu.ListComment()
+	return cc.cu.ListComment()
 }
 
 // ListCommentByThreadID は指定されたThreadIDを持つComment一覧を取得します。
@@ -77,8 +77,7 @@ func (cc *CommentController) ListCommentByThreadID(tID string) ([]entities.Comme
 	if err != nil {
 		return nil, err
 	}
-	tu := di.GetCommentUsecase()
-	return tu.ListCommentByThreadID(tid)
+	return cc.cu.ListCommentByThreadID(tid)
 }
 
 // convertIDToCommentID は文字列のCommentIDをentities.CommentIDに変換します。

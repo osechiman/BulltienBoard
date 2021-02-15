@@ -3,39 +3,37 @@
 package di
 
 import (
+	"vspro/adapters/controllers"
 	"vspro/adapters/gateways"
+	"vspro/adapters/presenters"
+	"vspro/drivers/web/api"
 	"vspro/usecases"
 
 	"github.com/google/wire"
 )
 
-func GetBulletinBoardUsecase() *usecases.BulletinBoardUsecase {
+func InitializeRouter() *api.Router {
+	// api.NewRouterで生成する値に必要なプロバイダ(コンストラクタ)を全て列挙します。
+	// wire.Bindでは列挙したプロバイダ(コンストラクタ)がインターフェースを要求している時に実態として何を渡すか定義しています。
+	// 第一引数はinterfaceです。
+	// 第二引数は第一引数のinterfaceを満たした実態を渡しています。
+	// この時第二引数の*gateways.InMemoryRepositoryはgateways.NewInMemoryRepositoryが実行されるように依存解決されます。
 	wire.Build(
+		api.NewRouter,
+		controllers.NewBulletinBoardController,
+		controllers.NewThreadController,
+		controllers.NewCommentController,
+		presenters.NewBulletinBoardPresenter,
+		presenters.NewThreadPresenter,
+		presenters.NewCommentPresenter,
+		presenters.NewErrorPresenter,
 		usecases.NewBulletinBoardUsecase,
-		gateways.NewInMemoryRepository,
-		wire.Bind(new(usecases.BulletinBoardRepositorer), new(*gateways.InMemoryRepository)),
-		wire.Bind(new(usecases.ThreadRepositorer), new(*gateways.InMemoryRepository)),
-	)
-	return &usecases.BulletinBoardUsecase{}
-}
-
-func GetThreadUsecase() *usecases.ThreadUsecase {
-	wire.Build(
 		usecases.NewThreadUsecase,
-		gateways.NewInMemoryRepository,
-		wire.Bind(new(usecases.ThreadRepositorer), new(*gateways.InMemoryRepository)),
-		wire.Bind(new(usecases.BulletinBoardRepositorer), new(*gateways.InMemoryRepository)),
-		wire.Bind(new(usecases.CommentRepositorer), new(*gateways.InMemoryRepository)),
-	)
-	return &usecases.ThreadUsecase{}
-}
-
-func GetCommentUsecase() *usecases.CommentUsecase {
-	wire.Build(
 		usecases.NewCommentUsecase,
 		gateways.NewInMemoryRepository,
-		wire.Bind(new(usecases.CommentRepositorer), new(*gateways.InMemoryRepository)),
+		wire.Bind(new(usecases.BulletinBoardRepositorer), new(*gateways.InMemoryRepository)),
 		wire.Bind(new(usecases.ThreadRepositorer), new(*gateways.InMemoryRepository)),
+		wire.Bind(new(usecases.CommentRepositorer), new(*gateways.InMemoryRepository)),
 	)
-	return &usecases.CommentUsecase{}
+	return &api.Router{}
 }

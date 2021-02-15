@@ -2,54 +2,46 @@ package api
 
 import (
 	"net/http"
-	"vspro/adapters/controllers"
-	"vspro/adapters/presenters"
 
 	"github.com/gin-gonic/gin"
 )
 
 // postThread はPostされてきたThread(json)を保存します。
-func postThread(c *gin.Context) {
-	tc := controllers.NewThreadController()
-	t, err := tc.AddThread(c)
+func (r *Router) postThread(c *gin.Context) {
+	t, err := r.ThreadController.AddThread(c)
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	tp := presenters.NewThreadPresenter()
-	res := tp.ConvertToHttpThreadResponse(t)
+	res := r.ThreadPresenter.ConvertToHttpThreadResponse(t)
 	c.JSON(http.StatusCreated, res)
 	return
 }
 
 // getThreadByID 指定したIDのThreadをjsonで出力します。
-func getThreadByID(c *gin.Context) {
+func (r *Router) getThreadByID(c *gin.Context) {
 	tid := c.Param("id")
-	tc := controllers.NewThreadController()
-	t, err := tc.GetThreadByID(tid)
+	t, err := r.ThreadController.GetThreadByID(tid)
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	tp := presenters.NewThreadPresenter()
-	res := tp.ConvertToHttpThreadResponse(t)
+	res := r.ThreadPresenter.ConvertToHttpThreadResponse(t)
 	c.JSON(http.StatusOK, res)
 	return
 }
 
 // listThread はThreadの一覧をjsonで出力します。
-func listThread(c *gin.Context) {
-	tc := controllers.NewThreadController()
-	tl, err := tc.ListThread()
+func (r *Router) listThread(c *gin.Context) {
+	tl, err := r.ThreadController.ListThread()
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	tp := presenters.NewThreadPresenter()
-	res := tp.ConvertToHttpThreadListResponse(tl)
+	res := r.ThreadPresenter.ConvertToHttpThreadListResponse(tl)
 	c.JSON(http.StatusOK, res)
 	return
 }

@@ -2,38 +2,32 @@ package api
 
 import (
 	"net/http"
-	"vspro/adapters/controllers"
-	"vspro/adapters/presenters"
 
 	"github.com/gin-gonic/gin"
 )
 
 // postComment はPostされてきたComment(json)を保存します。
-func postComment(c *gin.Context) {
-	cc := controllers.NewCommentController()
-	cm, err := cc.AddComment(c)
+func (r *Router) postComment(c *gin.Context) {
+	cm, err := r.CommentController.AddComment(c)
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	cp := presenters.NewCommentPresenter()
-	res := cp.ConvertToHttpCommentResponse(cm)
+	res := r.CommentPresenter.ConvertToHttpCommentResponse(cm)
 	c.JSON(http.StatusCreated, res)
 	return
 }
 
 // listComment はCommentの一覧をjsonで出力します。
-func listComment(c *gin.Context) {
-	cc := controllers.NewCommentController()
-	cl, err := cc.ListComment()
+func (r *Router) listComment(c *gin.Context) {
+	cl, err := r.CommentController.ListComment()
 	if err != nil {
-		responseByError(c, err)
+		r.responseByError(c, err)
 		return
 	}
 
-	cp := presenters.NewCommentPresenter()
-	res := cp.ConvertToHttpCommentListResponse(cl)
+	res := r.CommentPresenter.ConvertToHttpCommentListResponse(cl)
 	c.JSON(http.StatusOK, res)
 	return
 }

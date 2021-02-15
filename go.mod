@@ -10,7 +10,7 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/go-playground/validator/v10 v10.2.0 // indirect
 	github.com/google/uuid v1.1.1
-	github.com/google/wire v0.4.0
+	github.com/google/wire v0.5.0
 	github.com/gorilla/websocket v1.4.1 // indirect
 	github.com/kazukousen/gouml v0.0.0-20200217144925-c881f0b0c32d // indirect
 	github.com/kelseyhightower/envconfig v1.4.0
