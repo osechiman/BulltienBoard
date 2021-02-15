@@ -15,6 +15,11 @@ func (r *Router) postThread(c *gin.Context) {
 	}
 
 	res := r.ThreadPresenter.ConvertToHttpThreadResponse(t)
+	if err != nil {
+		r.responseByError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusCreated, res)
 	return
 }
@@ -29,6 +34,11 @@ func (r *Router) getThreadByID(c *gin.Context) {
 	}
 
 	res := r.ThreadPresenter.ConvertToHttpThreadResponse(t)
+	if err != nil {
+		r.responseByError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, res)
 	return
 }
@@ -42,6 +52,11 @@ func (r *Router) listThread(c *gin.Context) {
 	}
 
 	res := r.ThreadPresenter.ConvertToHttpThreadListResponse(tl)
+	if err != nil {
+		r.responseByError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, res)
 	return
 }

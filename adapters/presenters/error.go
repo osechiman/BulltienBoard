@@ -1,9 +1,5 @@
 package presenters
 
-import (
-	"net/http"
-)
-
 // ErrorPresenter はエラー時に外部へ渡す為にデータの変換を行います。
 type ErrorPresenter struct{}
 
@@ -13,6 +9,6 @@ func NewErrorPresenter() *ErrorPresenter {
 }
 
 // ConvertToHttpErrorResponse はエラー時のレスポンスを返却します。
-func (ep *ErrorPresenter) ConvertToHttpErrorResponse(httpStatusCode int, err error) *HTTPResponse {
-	return newHTTPErrorResponse(httpStatusCode, http.StatusText(httpStatusCode), err)
+func (ep *ErrorPresenter) ConvertToHttpErrorResponse(err error) *HTTPResponse {
+	return newHTTPErrorResponse(err)
 }

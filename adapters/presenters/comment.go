@@ -1,7 +1,6 @@
 package presenters
 
 import (
-	"net/http"
 	"vspro/entities"
 )
 
@@ -27,7 +26,7 @@ func (cp *CommentPresenter) ConvertToHttpCommentListResponse(cl []entities.Comme
 	for _, c := range cl {
 		res = append(res, convertEntitiesCommentToComment(c))
 	}
-	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(res)
 }
 
 // ConvertToHttpCommentResponse はCommentのレスポンスを返却します。
@@ -35,7 +34,7 @@ func (cp *CommentPresenter) ConvertToHttpCommentResponse(c entities.Comment) *HT
 	res := make([]Comment, 0)
 	pc := convertEntitiesCommentToComment(c)
 	res = append(res, pc)
-	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(res)
 }
 
 // convertEntitiesCommentToComment はentities.CommentからHTTPレスポンス用のStructを返却します。

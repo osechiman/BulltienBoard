@@ -87,24 +87,25 @@ func Listen(r *Router) {
 // responseByError はerrorobjectsのType毎にjsonを出力します。
 func (r *Router) responseByError(c *gin.Context, err error) {
 	if err != nil {
+		res := r.ErrorPresenter.ConvertToHttpErrorResponse(err)
 		switch t := err.(type) {
 		case *errorobjects.NotFoundError:
-			c.JSON(http.StatusNotFound, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusNotFound, t))
+			c.JSON(http.StatusNotFound, res)
 			logger.GetLoggerColumns(c).Debug(c, t.Error())
 		case *errorobjects.MissingRequiredFieldsError:
-			c.JSON(http.StatusBadRequest, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
+			c.JSON(http.StatusBadRequest, res)
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.ParameterBindingError:
-			c.JSON(http.StatusBadRequest, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
+			c.JSON(http.StatusBadRequest, res)
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.CharacterSizeValidationError:
-			c.JSON(http.StatusBadRequest, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusBadRequest, t))
+			c.JSON(http.StatusBadRequest, res)
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		case *errorobjects.ResourceLimitedError:
-			c.JSON(http.StatusInsufficientStorage, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusInsufficientStorage, t))
+			c.JSON(http.StatusInsufficientStorage, res)
 			logger.GetLoggerColumns(c).Warn(c, t.Error())
 		default:
-			c.JSON(http.StatusInternalServerError, r.ErrorPresenter.ConvertToHttpErrorResponse(http.StatusInternalServerError, t))
+			c.JSON(http.StatusInternalServerError, res)
 			logger.GetLoggerColumns(c).Error(c, t.Error())
 		}
 	}

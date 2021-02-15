@@ -1,7 +1,6 @@
 package presenters
 
 import (
-	"net/http"
 	"vspro/entities"
 )
 
@@ -29,7 +28,7 @@ func (tp *ThreadPresenter) ConvertToHttpThreadListResponse(tl []entities.Thread)
 		pt.Comments = make([]Comment, 0)
 		res = append(res, pt)
 	}
-	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(res)
 }
 
 // ConvertToHttpBulletinBoardResponse はCommentを含むThreadのレスポンスを返却します。
@@ -40,7 +39,7 @@ func (tp *ThreadPresenter) ConvertToHttpThreadResponse(t entities.Thread) *HTTPR
 		pt.Comments = make([]Comment, 0)
 	}
 	res = append(res, pt)
-	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(res)
 }
 
 // convertEntitiesThreadToThread はentities.ThreadからHTTPレスポンス用のStructを返却します。

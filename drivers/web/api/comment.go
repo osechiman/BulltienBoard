@@ -15,6 +15,11 @@ func (r *Router) postComment(c *gin.Context) {
 	}
 
 	res := r.CommentPresenter.ConvertToHttpCommentResponse(cm)
+	if err != nil {
+		r.responseByError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusCreated, res)
 	return
 }
@@ -28,6 +33,11 @@ func (r *Router) listComment(c *gin.Context) {
 	}
 
 	res := r.CommentPresenter.ConvertToHttpCommentListResponse(cl)
+	if err != nil {
+		r.responseByError(c, err)
+		return
+	}
+
 	c.JSON(http.StatusOK, res)
 	return
 }

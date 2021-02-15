@@ -1,7 +1,6 @@
 package presenters
 
 import (
-	"net/http"
 	"vspro/entities"
 )
 
@@ -28,7 +27,7 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardListResponse(bbl []
 		bb.Threads = nil
 		res = append(res, convertEntitiesBulletinBoardToBulletinBoard(bb))
 	}
-	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(res)
 }
 
 // ConvertToHttpBulletinBoardResponse はThreadを含むBulletinBoardのレスポンスを返却します。
@@ -36,7 +35,7 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardResponse(bb entitie
 	res := make([]BulletinBoard, 0)
 	pbb := convertEntitiesBulletinBoardToBulletinBoard(bb)
 	res = append(res, pbb)
-	return newHTTPSuccessResponse(http.StatusOK, http.StatusText(http.StatusOK), res)
+	return newHTTPSuccessResponse(res)
 }
 
 // convertEntitiesBulletinBoardToBulletinBoard はentities.BulletinBoardからHTTPレスポンス用のStructを返却します。
