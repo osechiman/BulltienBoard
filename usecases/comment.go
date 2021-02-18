@@ -6,6 +6,7 @@ import (
 	"bulltienboard/entities/valueobjects"
 )
 
+// CommentLimit は作成出来るCommentの上限値です。
 const CommentLimit = 1000
 
 // CommentUsecase はCommentに対するUsecaseを定義するものです。

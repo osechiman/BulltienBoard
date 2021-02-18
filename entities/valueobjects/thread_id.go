@@ -7,7 +7,7 @@ import (
 // threadID はuuid.UUIDを独自のTypeに再定義したものです。
 type threadID uuid.UUID
 
-// TreadID はスレッドのIDです。
+// ThreadID はスレッドのIDです。
 type ThreadID struct {
 	id  threadID // id はcommentIDです。
 	str string   // str はuuid.UUIDを文字列に変換したものです。

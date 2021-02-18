@@ -19,8 +19,8 @@ type BulletinBoard struct {
 	Threads []Thread // Threads はThreadの一覧です。
 }
 
-// ConvertToHttpBulletinBoardListResponse はBulletinBoard一覧のレスポンスを返却します。
-func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardListResponse(bbl []entities.BulletinBoard) *HTTPResponse {
+// ConvertToHTTPBulletinBoardListResponse はBulletinBoard一覧のレスポンスを返却します。
+func (bbp *BulletinBoardPresenter) ConvertToHTTPBulletinBoardListResponse(bbl []entities.BulletinBoard) *HTTPResponse {
 	res := make([]BulletinBoard, 0)
 	for _, bb := range bbl {
 		// レスポンス時のデータ転送量を減らす為にListResponseではThreadのデータは返さない
@@ -30,8 +30,8 @@ func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardListResponse(bbl []
 	return newHTTPSuccessResponse(res)
 }
 
-// ConvertToHttpBulletinBoardResponse はThreadを含むBulletinBoardのレスポンスを返却します。
-func (bbp *BulletinBoardPresenter) ConvertToHttpBulletinBoardResponse(bb entities.BulletinBoard) *HTTPResponse {
+// ConvertToHTTPBulletinBoardResponse はThreadを含むBulletinBoardのレスポンスを返却します。
+func (bbp *BulletinBoardPresenter) ConvertToHTTPBulletinBoardResponse(bb entities.BulletinBoard) *HTTPResponse {
 	res := make([]BulletinBoard, 0)
 	pbb := convertEntitiesBulletinBoardToBulletinBoard(bb)
 	res = append(res, pbb)

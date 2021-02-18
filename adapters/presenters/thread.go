@@ -20,8 +20,8 @@ type Thread struct {
 	Comments        []Comment // Comments はCommentの一覧です。
 }
 
-// ConvertToHttpThreadListResponse はThread一覧のレスポンスを返却します。
-func (tp *ThreadPresenter) ConvertToHttpThreadListResponse(tl []entities.Thread) *HTTPResponse {
+// ConvertToHTTPThreadListResponse はThread一覧のレスポンスを返却します。
+func (tp *ThreadPresenter) ConvertToHTTPThreadListResponse(tl []entities.Thread) *HTTPResponse {
 	res := make([]Thread, 0)
 	for _, t := range tl {
 		pt := convertEntitiesThreadToThread(t)
@@ -31,8 +31,8 @@ func (tp *ThreadPresenter) ConvertToHttpThreadListResponse(tl []entities.Thread)
 	return newHTTPSuccessResponse(res)
 }
 
-// ConvertToHttpBulletinBoardResponse はCommentを含むThreadのレスポンスを返却します。
-func (tp *ThreadPresenter) ConvertToHttpThreadResponse(t entities.Thread) *HTTPResponse {
+// ConvertToHTTPThreadResponse はCommentを含むThreadのレスポンスを返却します。
+func (tp *ThreadPresenter) ConvertToHTTPThreadResponse(t entities.Thread) *HTTPResponse {
 	res := make([]Thread, 0)
 	pt := convertEntitiesThreadToThread(t)
 	if pt.Comments == nil {

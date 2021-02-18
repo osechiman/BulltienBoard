@@ -143,21 +143,25 @@ func (i *InMemoryRepository) AddComment(c entities.Comment) error {
 	return nil
 }
 
+// DeleteAll はInMemoryRepository内の全データを削除します。
 func (i *InMemoryRepository) DeleteAll() {
-	i.DeleteBulletinBoardAll()
+	i.DeleteBulletinBoard()
 	i.DeleteThread()
 	i.DeleteComment()
 }
 
 // DeleteBulletinBoard はentities.BulletinBoardを全て削除します。
-func (i *InMemoryRepository) DeleteBulletinBoardAll() error {
+func (i *InMemoryRepository) DeleteBulletinBoard() error {
 	bulletinBoards = make(map[valueobjects.BulletinBoardID]entities.BulletinBoard)
 	return nil
 }
 
+// DeleteThread はentities.Threadを全て削除します。
 func (i *InMemoryRepository) DeleteThread() {
 	threads = make(map[valueobjects.ThreadID]entities.Thread)
 }
+
+// DeleteComment はentities.Commentを全て削除します。
 func (i *InMemoryRepository) DeleteComment() {
 	comments = make(map[valueobjects.CommentID]entities.Comment)
 }

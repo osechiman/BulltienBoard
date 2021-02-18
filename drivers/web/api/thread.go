@@ -14,7 +14,7 @@ func (r *Router) postThread(c *gin.Context) {
 		return
 	}
 
-	res := r.ThreadPresenter.ConvertToHttpThreadResponse(t)
+	res := r.ThreadPresenter.ConvertToHTTPThreadResponse(t)
 	if err != nil {
 		r.responseByError(c, err)
 		return
@@ -33,7 +33,7 @@ func (r *Router) getThreadByID(c *gin.Context) {
 		return
 	}
 
-	res := r.ThreadPresenter.ConvertToHttpThreadResponse(t)
+	res := r.ThreadPresenter.ConvertToHTTPThreadResponse(t)
 	if err != nil {
 		r.responseByError(c, err)
 		return
@@ -51,7 +51,7 @@ func (r *Router) listThread(c *gin.Context) {
 		return
 	}
 
-	res := r.ThreadPresenter.ConvertToHttpThreadListResponse(tl)
+	res := r.ThreadPresenter.ConvertToHTTPThreadListResponse(tl)
 	if err != nil {
 		r.responseByError(c, err)
 		return

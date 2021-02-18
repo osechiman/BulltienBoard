@@ -1,5 +1,5 @@
 /*
-Package zapLogger はロギング処理を実装します。
+Package logger はロギング処理を実装します。
 
 How to Use
 

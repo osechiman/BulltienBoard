@@ -6,6 +6,7 @@ import (
 	"bulltienboard/entities/valueobjects"
 )
 
+// BulletinBoardLimit は作成出来るBulletinBoardの上限値です。
 const BulletinBoardLimit = 50
 
 // BulletinBoardUsecase はBulletinBoardに対するUsecaseを定義するものです。

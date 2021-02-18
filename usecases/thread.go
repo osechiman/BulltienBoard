@@ -6,6 +6,7 @@ import (
 	"bulltienboard/entities/valueobjects"
 )
 
+// ThreadLimit は作成出来るThreadの上限値です。
 const ThreadLimit = 50
 
 // ThreadUsecase はThreadに対するUsecaseを定義するものです。

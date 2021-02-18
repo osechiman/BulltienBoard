@@ -14,7 +14,7 @@ func (r *Router) postComment(c *gin.Context) {
 		return
 	}
 
-	res := r.CommentPresenter.ConvertToHttpCommentResponse(cm)
+	res := r.CommentPresenter.ConvertToHTTPCommentResponse(cm)
 	if err != nil {
 		r.responseByError(c, err)
 		return
@@ -32,7 +32,7 @@ func (r *Router) listComment(c *gin.Context) {
 		return
 	}
 
-	res := r.CommentPresenter.ConvertToHttpCommentListResponse(cl)
+	res := r.CommentPresenter.ConvertToHTTPCommentListResponse(cl)
 	if err != nil {
 		r.responseByError(c, err)
 		return

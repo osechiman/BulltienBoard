@@ -14,5 +14,5 @@ type BulletinBoardRepositorer interface {
 	// AddBulletinBoard はentities.BulletinBoardを追加します。
 	AddBulletinBoard(bb entities.BulletinBoard) error
 	// DeleteBulletinBoard はentities.BulletinBoardを全て削除します。
-	DeleteBulletinBoardAll() error
+	DeleteBulletinBoard() error
 }

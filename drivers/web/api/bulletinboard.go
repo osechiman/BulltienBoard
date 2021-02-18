@@ -14,7 +14,7 @@ func (r *Router) listBulletinBoard(c *gin.Context) {
 		return
 	}
 
-	res := r.BulletinBoardPresenter.ConvertToHttpBulletinBoardListResponse(bbl)
+	res := r.BulletinBoardPresenter.ConvertToHTTPBulletinBoardListResponse(bbl)
 	if err != nil {
 		r.responseByError(c, err)
 		return
@@ -33,7 +33,7 @@ func (r *Router) getBulletinBoardByID(c *gin.Context) {
 		return
 	}
 
-	res := r.BulletinBoardPresenter.ConvertToHttpBulletinBoardResponse(bb)
+	res := r.BulletinBoardPresenter.ConvertToHTTPBulletinBoardResponse(bb)
 	if err != nil {
 		r.responseByError(c, err)
 		return
@@ -51,7 +51,7 @@ func (r *Router) postBulletinBoard(c *gin.Context) {
 		return
 	}
 
-	res := r.BulletinBoardPresenter.ConvertToHttpBulletinBoardResponse(bb)
+	res := r.BulletinBoardPresenter.ConvertToHTTPBulletinBoardResponse(bb)
 	if err != nil {
 		r.responseByError(c, err)
 		return
