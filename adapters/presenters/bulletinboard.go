@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	"vspro/entities"
+	"bulltienboard/entities"
 )
 
 // BulletinBoardPresenter はentities.BulletinBoardを外部へ渡す為にデータの変換を行います。

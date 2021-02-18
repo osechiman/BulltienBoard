@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	"vspro/entities"
+	"bulltienboard/entities"
 )
 
 // ThreadPresenter はentities.Threadを外部へ渡す為にデータの変換を行います。

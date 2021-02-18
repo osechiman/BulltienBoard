@@ -1,8 +1,8 @@
 package main
 
 import (
-	"vspro/adapters/middlewares/di"
-	"vspro/drivers/web/api"
+	"bulltienboard/adapters/middlewares/di"
+	"bulltienboard/drivers/web/api"
 )
 
 func main() {

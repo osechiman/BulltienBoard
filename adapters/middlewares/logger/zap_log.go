@@ -1,12 +1,12 @@
 package logger
 
 import (
+	"bulltienboard/drivers/configs"
 	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
-	"vspro/drivers/configs"
 
 	"github.com/google/uuid"
 

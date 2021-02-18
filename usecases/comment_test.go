@@ -1,12 +1,12 @@
 package usecases
 
 import (
+	"bulltienboard/adapters/gateways"
+	"bulltienboard/entities"
+	"bulltienboard/entities/valueobjects"
 	"reflect"
 	"sort"
 	"testing"
-	"vspro/adapters/gateways"
-	"vspro/entities"
-	"vspro/entities/valueobjects"
 )
 
 func TestCommentUsecase_AddComment(t *testing.T) {

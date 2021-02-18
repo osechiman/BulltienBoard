@@ -1,9 +1,9 @@
 package usecases
 
 import (
-	"vspro/entities"
-	"vspro/entities/errorobjects"
-	"vspro/entities/valueobjects"
+	"bulltienboard/entities"
+	"bulltienboard/entities/errorobjects"
+	"bulltienboard/entities/valueobjects"
 )
 
 const BulletinBoardLimit = 50

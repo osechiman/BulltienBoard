@@ -1,7 +1,7 @@
 package presenters
 
 import (
-	"vspro/entities"
+	"bulltienboard/entities"
 )
 
 // CommentPresenter はentities.Commentを外部へ渡す為にデータの変換を行います。

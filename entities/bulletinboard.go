@@ -1,8 +1,8 @@
 package entities
 
 import (
-	"vspro/entities/errorobjects"
-	"vspro/entities/valueobjects"
+	"bulltienboard/entities/errorobjects"
+	"bulltienboard/entities/valueobjects"
 
 	"github.com/go-playground/validator"
 )

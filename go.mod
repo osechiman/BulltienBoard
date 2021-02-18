@@ -1,4 +1,4 @@
-module vspro
+module bulltienboard
 
 go 1.13
 

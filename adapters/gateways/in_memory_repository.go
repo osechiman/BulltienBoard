@@ -1,9 +1,9 @@
 package gateways
 
 import (
-	"vspro/entities"
-	"vspro/entities/errorobjects"
-	"vspro/entities/valueobjects"
+	"bulltienboard/entities"
+	"bulltienboard/entities/errorobjects"
+	"bulltienboard/entities/valueobjects"
 )
 
 // inMemoryRepository はメモリ上でデータを管理する為の変数です。

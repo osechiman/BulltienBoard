@@ -6,11 +6,11 @@
 package di
 
 import (
-	"vspro/adapters/controllers"
-	"vspro/adapters/gateways"
-	"vspro/adapters/presenters"
-	"vspro/drivers/web/api"
-	"vspro/usecases"
+	"bulltienboard/adapters/controllers"
+	"bulltienboard/adapters/gateways"
+	"bulltienboard/adapters/presenters"
+	"bulltienboard/drivers/web/api"
+	"bulltienboard/usecases"
 )
 
 // Injectors from wire.go:

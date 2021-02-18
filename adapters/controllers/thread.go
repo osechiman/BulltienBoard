@@ -1,10 +1,10 @@
 package controllers
 
 import (
-	"vspro/entities"
-	"vspro/entities/errorobjects"
-	"vspro/entities/valueobjects"
-	"vspro/usecases"
+	"bulltienboard/entities"
+	"bulltienboard/entities/errorobjects"
+	"bulltienboard/entities/valueobjects"
+	"bulltienboard/usecases"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator"

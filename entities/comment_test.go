@@ -1,9 +1,9 @@
 package entities
 
 import (
+	"bulltienboard/entities/valueobjects"
 	"reflect"
 	"testing"
-	"vspro/entities/valueobjects"
 )
 
 func TestNewComment(t *testing.T) {

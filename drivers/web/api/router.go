@@ -1,12 +1,12 @@
 package api
 
 import (
+	"bulltienboard/adapters/controllers"
+	"bulltienboard/adapters/middlewares/logger"
+	"bulltienboard/adapters/presenters"
+	"bulltienboard/drivers/configs"
+	"bulltienboard/entities/errorobjects"
 	"net/http"
-	"vspro/adapters/controllers"
-	"vspro/adapters/middlewares/logger"
-	"vspro/adapters/presenters"
-	"vspro/drivers/configs"
-	"vspro/entities/errorobjects"
 
 	"github.com/gin-gonic/gin"
 )

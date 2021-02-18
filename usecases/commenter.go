@@ -1,8 +1,8 @@
 package usecases
 
 import (
-	"vspro/entities"
-	"vspro/entities/valueobjects"
+	"bulltienboard/entities"
+	"bulltienboard/entities/valueobjects"
 )
 
 // CommentRepositorer は外部データソースに存在するentities.Commentを操作する際に利用するインターフェースです。

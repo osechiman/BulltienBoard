@@ -1,7 +1,7 @@
 package valueobjects
 
 import (
-	"vspro/entities/errorobjects"
+	"bulltienboard/entities/errorobjects"
 
 	"github.com/google/uuid"
 )
