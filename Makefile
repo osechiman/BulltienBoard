@@ -1,3 +1,5 @@
+all: test lint build
+
 test:
 	go test -v ./...
 

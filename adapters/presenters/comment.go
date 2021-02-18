@@ -20,8 +20,8 @@ type Comment struct {
 	CreatAt  int64  // CreatAt はCommentが登録された時間をunixTimeです。
 }
 
-// ConvertToHttpCommentListResponse はComment一覧のレスポンスを返却します。
-func (cp *CommentPresenter) ConvertToHttpCommentListResponse(cl []entities.Comment) *HTTPResponse {
+// ConvertToHTTPCommentListResponse はComment一覧のレスポンスを返却します。
+func (cp *CommentPresenter) ConvertToHTTPCommentListResponse(cl []entities.Comment) *HTTPResponse {
 	res := make([]Comment, 0)
 	for _, c := range cl {
 		res = append(res, convertEntitiesCommentToComment(c))
@@ -29,8 +29,8 @@ func (cp *CommentPresenter) ConvertToHttpCommentListResponse(cl []entities.Comme
 	return newHTTPSuccessResponse(res)
 }
 
-// ConvertToHttpCommentResponse はCommentのレスポンスを返却します。
-func (cp *CommentPresenter) ConvertToHttpCommentResponse(c entities.Comment) *HTTPResponse {
+// ConvertToHTTPCommentResponse はCommentのレスポンスを返却します。
+func (cp *CommentPresenter) ConvertToHTTPCommentResponse(c entities.Comment) *HTTPResponse {
 	res := make([]Comment, 0)
 	pc := convertEntitiesCommentToComment(c)
 	res = append(res, pc)

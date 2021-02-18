@@ -8,7 +8,7 @@ func NewErrorPresenter() *ErrorPresenter {
 	return &ErrorPresenter{}
 }
 
-// ConvertToHttpErrorResponse はエラー時のレスポンスを返却します。
-func (ep *ErrorPresenter) ConvertToHttpErrorResponse(err error) *HTTPResponse {
+// ConvertToHTTPErrorResponse はエラー時のレスポンスを返却します。
+func (ep *ErrorPresenter) ConvertToHTTPErrorResponse(err error) *HTTPResponse {
 	return newHTTPErrorResponse(err)
 }

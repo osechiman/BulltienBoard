@@ -11,6 +11,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Router はWebAPIのリクエストを処理するために必要な構造体をまとめた構造体です。
 type Router struct {
 	BulletinBoardController *controllers.BulletinBoardController
 	BulletinBoardPresenter  *presenters.BulletinBoardPresenter
@@ -21,6 +22,7 @@ type Router struct {
 	ErrorPresenter          *presenters.ErrorPresenter
 }
 
+// NewRouter はRouterのコンストラクタです。
 func NewRouter(bulletinBoardController *controllers.BulletinBoardController,
 	bulletinBoardPresenter *presenters.BulletinBoardPresenter,
 	threadController *controllers.ThreadController,
@@ -87,7 +89,7 @@ func Listen(r *Router) {
 // responseByError はerrorobjectsのType毎にjsonを出力します。
 func (r *Router) responseByError(c *gin.Context, err error) {
 	if err != nil {
-		res := r.ErrorPresenter.ConvertToHttpErrorResponse(err)
+		res := r.ErrorPresenter.ConvertToHTTPErrorResponse(err)
 		switch t := err.(type) {
 		case *errorobjects.NotFoundError:
 			c.JSON(http.StatusNotFound, res)
