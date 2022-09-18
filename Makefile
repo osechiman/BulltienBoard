@@ -6,6 +6,8 @@ test:
 lint:
 	go vet ./... && golint ./...
 
+GOPATH=$$(go env GOPATH)
+GOUML="$(GOPATH)/bin/gouml"
 build:
-	go build && gouml i && mv ./file.puml ./documents/classdiagram.puml
+	go build && $(GOUML) i && mv ./file.puml ./documents/classdiagram.puml
 
