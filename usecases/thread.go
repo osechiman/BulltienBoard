@@ -61,7 +61,7 @@ func (tu *ThreadUsecase) AddThread(t entities.Thread) error {
 	}
 
 	if len(ts) > ThreadLimit {
-		return errorobjects.NewResourceLimitedError("maximum number of thread exceeded. thread limit is " + string(ThreadLimit))
+		return errorobjects.NewResourceLimitedError("maximum number of thread exceeded. thread limit is " + string(rune(ThreadLimit)))
 	}
 
 	return tu.ThreadRepository.AddThread(t)
