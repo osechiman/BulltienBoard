@@ -1,5 +1,301 @@
 @startuml
 
+package "valueobjects" {
+	class "BulletinBoardID" as valueobjects.BulletinBoardID <<V,Orchid>> {
+		-id: valueobjects.bulletinBoardID
+		-str: string
+		+Get(): valueobjects.BulletinBoardID
+		+String(): string
+		+Equals(other: valueobjects.BulletinBoardID): bool
+	}
+}
+
+	valueobjects.BulletinBoardID --> valueobjects.bulletinBoardID
+
+	valueobjects.BulletinBoardID ..> valueobjects.BulletinBoardID : <<return>> 
+	valueobjects.BulletinBoardID ..> valueobjects.BulletinBoardID : <<use>> 
+
+package "valueobjects" {
+	class "CommentID" as valueobjects.CommentID <<V,Orchid>> {
+		-id: valueobjects.commentID
+		-str: string
+		+Get(): valueobjects.CommentID
+		+String(): string
+		+Equals(other: valueobjects.CommentID): bool
+	}
+}
+
+	valueobjects.CommentID --> valueobjects.commentID
+
+	valueobjects.CommentID ..> valueobjects.CommentID : <<return>> 
+	valueobjects.CommentID ..> valueobjects.CommentID : <<use>> 
+
+package "valueobjects" {
+	class "CommentTime" as valueobjects.CommentTime <<V,Orchid>> {
+		-unixTime: int64
+		+Get(): valueobjects.CommentTime
+		+ToUnixTime(): int64
+		+Equals(other: valueobjects.CommentTime): bool
+	}
+}
+
+
+	valueobjects.CommentTime ..> valueobjects.CommentTime : <<return>> 
+	valueobjects.CommentTime ..> valueobjects.CommentTime : <<use>> 
+
+package "valueobjects" {
+	class "ThreadID" as valueobjects.ThreadID <<V,Orchid>> {
+		-id: valueobjects.threadID
+		-str: string
+		+Get(): valueobjects.ThreadID
+		+String(): string
+		+Equals(other: valueobjects.ThreadID): bool
+	}
+}
+
+	valueobjects.ThreadID --> valueobjects.threadID
+
+	valueobjects.ThreadID ..> valueobjects.ThreadID : <<return>> 
+	valueobjects.ThreadID ..> valueobjects.ThreadID : <<use>> 
+
+package "valueobjects" {
+	class "bulletinBoardID" as valueobjects.bulletinBoardID <<V,Orchid>>
+}
+
+
+
+package "valueobjects" {
+	class "commentID" as valueobjects.commentID <<V,Orchid>>
+}
+
+
+
+package "valueobjects" {
+	class "threadID" as valueobjects.threadID <<V,Orchid>>
+}
+
+
+
+package "gateways" {
+	class "InMemoryRepository" as gateways.InMemoryRepository <<E,#FFCC00>> {
+		+GetBulletinBoardByID(ID: valueobjects.BulletinBoardID): (entities.BulletinBoard, error)
+		+AddBulletinBoard(b: entities.BulletinBoard): error
+		+ListBulletinBoard(): (entities.BulletinBoard, error)
+		+ListThread(): (entities.Thread, error)
+		+ListThreadByBulletinBoardID(bID: valueobjects.BulletinBoardID): (entities.Thread, error)
+		+GetThreadByID(ID: valueobjects.ThreadID): (entities.Thread, error)
+		+AddThread(t: entities.Thread): error
+		+ListComment(): (entities.Comment, error)
+		+ListCommentByThreadID(tID: valueobjects.ThreadID): (entities.Comment, error)
+		+AddComment(c: entities.Comment): error
+		+DeleteAll()
+		+DeleteBulletinBoard(): error
+		+DeleteThread()
+		+DeleteComment()
+	}
+}
+
+
+	gateways.InMemoryRepository ..> valueobjects.BulletinBoardID : <<use>> 
+	gateways.InMemoryRepository ..> entities.BulletinBoard : <<return>> 
+	gateways.InMemoryRepository ..> entities.BulletinBoard : <<use>> 
+	gateways.InMemoryRepository ..> entities.BulletinBoard : <<return>> 
+	gateways.InMemoryRepository ..> entities.Thread : <<return>> 
+	gateways.InMemoryRepository ..> valueobjects.BulletinBoardID : <<use>> 
+	gateways.InMemoryRepository ..> entities.Thread : <<return>> 
+	gateways.InMemoryRepository ..> valueobjects.ThreadID : <<use>> 
+	gateways.InMemoryRepository ..> entities.Thread : <<return>> 
+	gateways.InMemoryRepository ..> entities.Thread : <<use>> 
+	gateways.InMemoryRepository ..> entities.Comment : <<return>> 
+	gateways.InMemoryRepository ..> valueobjects.ThreadID : <<use>> 
+	gateways.InMemoryRepository ..> entities.Comment : <<return>> 
+	gateways.InMemoryRepository ..> entities.Comment : <<use>> 
+
+package "logger" {
+	class "LogColumns" as logger.LogColumns <<E,#FFCC00>> {
+		+PID: string
+		+UA: string
+		+Path: string
+		+Body: []byte
+		+Error(c: gin.Context, msg: interface{})
+		+Info(c: gin.Context, msg: interface{})
+		+Debug(c: gin.Context, msg: interface{})
+		+Warn(c: gin.Context, msg: interface{})
+	}
+}
+
+
+
+package "logger" {
+	interface "Logger" as logger.Logger {
+		+Debug(c: *context.Context, msg: interface{})
+		+Error(c: *context.Context, msg: interface{})
+		+Info(c: *context.Context, msg: interface{})
+		+Warn(c: *context.Context, msg: interface{})
+	}
+}
+
+
+
+package "presenters" {
+	class "BulletinBoard" as presenters.BulletinBoard <<V,Orchid>> {
+		+ID: string
+		+Title: string
+		+Threads: []presenters.Thread
+	}
+}
+
+	presenters.BulletinBoard --> presenters.Thread
+
+
+package "presenters" {
+	class "BulletinBoardPresenter" as presenters.BulletinBoardPresenter <<V,Orchid>> {
+		+ConvertToHTTPBulletinBoardListResponse(bbl: entities.BulletinBoard): *presenters.HTTPResponse
+		+ConvertToHTTPBulletinBoardResponse(bb: entities.BulletinBoard): *presenters.HTTPResponse
+	}
+}
+
+
+	presenters.BulletinBoardPresenter ..> entities.BulletinBoard : <<use>> 
+	presenters.BulletinBoardPresenter ..> presenters.HTTPResponse : <<return>> 
+	presenters.BulletinBoardPresenter ..> entities.BulletinBoard : <<use>> 
+	presenters.BulletinBoardPresenter ..> presenters.HTTPResponse : <<return>> 
+
+package "presenters" {
+	class "Comment" as presenters.Comment <<V,Orchid>> {
+		+ID: string
+		+ThreadID: string
+		+Text: string
+		+CreatAt: int64
+	}
+}
+
+
+
+package "presenters" {
+	class "CommentPresenter" as presenters.CommentPresenter <<V,Orchid>> {
+		+ConvertToHTTPCommentListResponse(cl: entities.Comment): *presenters.HTTPResponse
+		+ConvertToHTTPCommentResponse(c: entities.Comment): *presenters.HTTPResponse
+	}
+}
+
+
+	presenters.CommentPresenter ..> entities.Comment : <<use>> 
+	presenters.CommentPresenter ..> presenters.HTTPResponse : <<return>> 
+	presenters.CommentPresenter ..> entities.Comment : <<use>> 
+	presenters.CommentPresenter ..> presenters.HTTPResponse : <<return>> 
+
+package "presenters" {
+	class "ErrorPresenter" as presenters.ErrorPresenter <<V,Orchid>> {
+		+ConvertToHTTPErrorResponse(err: error): *presenters.HTTPResponse
+	}
+}
+
+
+	presenters.ErrorPresenter ..> presenters.HTTPResponse : <<return>> 
+
+package "presenters" {
+	class "HTTPResponse" as presenters.HTTPResponse <<V,Orchid>> {
+		+Items: interface{}
+	}
+}
+
+
+
+package "presenters" {
+	class "Thread" as presenters.Thread <<V,Orchid>> {
+		+ID: string
+		+BulletinBoardID: string
+		+Title: string
+		+Comments: []presenters.Comment
+	}
+}
+
+	presenters.Thread --> presenters.Comment
+
+
+package "presenters" {
+	class "ThreadPresenter" as presenters.ThreadPresenter <<V,Orchid>> {
+		+ConvertToHTTPThreadListResponse(tl: entities.Thread): *presenters.HTTPResponse
+		+ConvertToHTTPThreadResponse(t: entities.Thread): *presenters.HTTPResponse
+	}
+}
+
+
+	presenters.ThreadPresenter ..> entities.Thread : <<use>> 
+	presenters.ThreadPresenter ..> presenters.HTTPResponse : <<return>> 
+	presenters.ThreadPresenter ..> entities.Thread : <<use>> 
+	presenters.ThreadPresenter ..> presenters.HTTPResponse : <<return>> 
+
+package "configs" {
+	class "Config" as configs.Config <<V,Orchid>> {
+		+Environment: string
+	}
+}
+
+
+
+package "configs" {
+	interface "Configer" as configs.Configer {
+		+Get(): configs.Config
+	}
+}
+
+
+	configs.Configer ..> configs.Config : <<return>> 
+
+package "configs" {
+	class "OsConfig" as configs.OsConfig <<V,Orchid>> {
+		-config: configs.Config
+		+Get(): configs.Config
+	}
+}
+
+	configs.OsConfig --> configs.Config
+
+	configs.OsConfig ..> configs.Config : <<return>> 
+
+package "configs" {
+	class "YamlConfig" as configs.YamlConfig <<V,Orchid>> {
+		-config: configs.Config
+		+Get(): configs.Config
+	}
+}
+
+	configs.YamlConfig --> configs.Config
+
+	configs.YamlConfig ..> configs.Config : <<return>> 
+
+package "api" {
+	class "Router" as api.Router <<E,#FFCC00>> {
+		+BulletinBoardController: controllers.BulletinBoardController
+		+BulletinBoardPresenter: presenters.BulletinBoardPresenter
+		+ThreadController: controllers.ThreadController
+		+ThreadPresenter: presenters.ThreadPresenter
+		+CommentController: controllers.CommentController
+		+CommentPresenter: presenters.CommentPresenter
+		+ErrorPresenter: presenters.ErrorPresenter
+		-listBulletinBoard(c: gin.Context)
+		-getBulletinBoardByID(c: gin.Context)
+		-postBulletinBoard(c: gin.Context)
+		-postComment(c: gin.Context)
+		-listComment(c: gin.Context)
+		-responseByError(c: gin.Context, err: error)
+		-postThread(c: gin.Context)
+		-getThreadByID(c: gin.Context)
+		-listThread(c: gin.Context)
+	}
+}
+
+	api.Router --> controllers.BulletinBoardController
+	api.Router --> presenters.BulletinBoardPresenter
+	api.Router --> controllers.ThreadController
+	api.Router --> presenters.ThreadPresenter
+	api.Router --> controllers.CommentController
+	api.Router --> presenters.CommentPresenter
+	api.Router --> presenters.ErrorPresenter
+
+
 package "entities" {
 	class "BulletinBoard" as entities.BulletinBoard <<V,Orchid>> {
 		+ID: entities.BulletinBoardIDer
@@ -86,78 +382,62 @@ package "entities" {
 	entities.ThreadIDer ..> valueobjects.ThreadID : <<use>> 
 	entities.ThreadIDer ..> valueobjects.ThreadID : <<return>> 
 
-package "valueobjects" {
-	class "BulletinBoardID" as valueobjects.BulletinBoardID <<V,Orchid>> {
-		-id: valueobjects.bulletinBoardID
-		-str: string
-		+Get(): valueobjects.BulletinBoardID
-		+String(): string
-		+Equals(other: valueobjects.BulletinBoardID): bool
-	}
-}
-
-	valueobjects.BulletinBoardID --> valueobjects.bulletinBoardID
-
-	valueobjects.BulletinBoardID ..> valueobjects.BulletinBoardID : <<return>> 
-	valueobjects.BulletinBoardID ..> valueobjects.BulletinBoardID : <<use>> 
-
-package "valueobjects" {
-	class "CommentID" as valueobjects.CommentID <<V,Orchid>> {
-		-id: valueobjects.commentID
-		-str: string
-		+Get(): valueobjects.CommentID
-		+String(): string
-		+Equals(other: valueobjects.CommentID): bool
-	}
-}
-
-	valueobjects.CommentID --> valueobjects.commentID
-
-	valueobjects.CommentID ..> valueobjects.CommentID : <<return>> 
-	valueobjects.CommentID ..> valueobjects.CommentID : <<use>> 
-
-package "valueobjects" {
-	class "CommentTime" as valueobjects.CommentTime <<V,Orchid>> {
-		-unixTime: int64
-		+Get(): valueobjects.CommentTime
-		+ToUnixTime(): int64
-		+Equals(other: valueobjects.CommentTime): bool
+package "errorobjects" {
+	class "CharacterSizeValidationError" as errorobjects.CharacterSizeValidationError <<V,Orchid>> {
+		-msg: string
+		-code: int
+		+Error(): string
 	}
 }
 
 
-	valueobjects.CommentTime ..> valueobjects.CommentTime : <<return>> 
-	valueobjects.CommentTime ..> valueobjects.CommentTime : <<use>> 
 
-package "valueobjects" {
-	class "ThreadID" as valueobjects.ThreadID <<V,Orchid>> {
-		-id: valueobjects.threadID
-		-str: string
-		+Get(): valueobjects.ThreadID
-		+String(): string
-		+Equals(other: valueobjects.ThreadID): bool
+package "errorobjects" {
+	class "InternalServerError" as errorobjects.InternalServerError <<V,Orchid>> {
+		-msg: string
+		-code: int
+		+Error(): string
 	}
 }
 
-	valueobjects.ThreadID --> valueobjects.threadID
 
-	valueobjects.ThreadID ..> valueobjects.ThreadID : <<return>> 
-	valueobjects.ThreadID ..> valueobjects.ThreadID : <<use>> 
 
-package "valueobjects" {
-	class "bulletinBoardID" as valueobjects.bulletinBoardID <<V,Orchid>>
+package "errorobjects" {
+	class "MissingRequiredFieldsError" as errorobjects.MissingRequiredFieldsError <<V,Orchid>> {
+		-msg: string
+		-code: int
+		+Error(): string
+	}
 }
 
 
 
-package "valueobjects" {
-	class "commentID" as valueobjects.commentID <<V,Orchid>>
+package "errorobjects" {
+	class "NotFoundError" as errorobjects.NotFoundError <<V,Orchid>> {
+		-msg: string
+		-code: int
+		+Error(): string
+	}
 }
 
 
 
-package "valueobjects" {
-	class "threadID" as valueobjects.threadID <<V,Orchid>>
+package "errorobjects" {
+	class "ParameterBindingError" as errorobjects.ParameterBindingError <<V,Orchid>> {
+		-msg: string
+		-code: int
+		+Error(): string
+	}
+}
+
+
+
+package "errorobjects" {
+	class "ResourceLimitedError" as errorobjects.ResourceLimitedError <<V,Orchid>> {
+		-msg: string
+		-code: int
+		+Error(): string
+	}
 }
 
 
@@ -343,293 +623,13 @@ package "controllers" {
 	controllers.ThreadController ..> entities.Thread : <<return>> 
 	controllers.ThreadController ..> entities.Thread : <<return>> 
 
-package "logger" {
-	class "LogColumns" as logger.LogColumns <<E,#FFCC00>> {
-		+PID: string
-		+UA: string
-		+Path: string
-		+Body: []byte
-		+Error(c: gin.Context, msg: interface{})
-		+Info(c: gin.Context, msg: interface{})
-		+Debug(c: gin.Context, msg: interface{})
-		+Warn(c: gin.Context, msg: interface{})
-	}
-}
-
-
-
-package "logger" {
-	interface "Logger" as logger.Logger {
-		+Debug(c: *context.Context, msg: interface{})
-		+Error(c: *context.Context, msg: interface{})
-		+Info(c: *context.Context, msg: interface{})
-		+Warn(c: *context.Context, msg: interface{})
-	}
-}
-
-
-
-package "presenters" {
-	class "BulletinBoard" as presenters.BulletinBoard <<V,Orchid>> {
-		+ID: string
-		+Title: string
-		+Threads: []presenters.Thread
-	}
-}
-
-	presenters.BulletinBoard --> presenters.Thread
-
-
-package "presenters" {
-	class "BulletinBoardPresenter" as presenters.BulletinBoardPresenter <<V,Orchid>> {
-		+ConvertToHTTPBulletinBoardListResponse(bbl: entities.BulletinBoard): *presenters.HTTPResponse
-		+ConvertToHTTPBulletinBoardResponse(bb: entities.BulletinBoard): *presenters.HTTPResponse
-	}
-}
-
-
-	presenters.BulletinBoardPresenter ..> entities.BulletinBoard : <<use>> 
-	presenters.BulletinBoardPresenter ..> presenters.HTTPResponse : <<return>> 
-	presenters.BulletinBoardPresenter ..> entities.BulletinBoard : <<use>> 
-	presenters.BulletinBoardPresenter ..> presenters.HTTPResponse : <<return>> 
-
-package "presenters" {
-	class "Comment" as presenters.Comment <<V,Orchid>> {
-		+ID: string
-		+ThreadID: string
-		+Text: string
-		+CreatAt: int64
-	}
-}
-
-
-
-package "presenters" {
-	class "CommentPresenter" as presenters.CommentPresenter <<V,Orchid>> {
-		+ConvertToHTTPCommentListResponse(cl: entities.Comment): *presenters.HTTPResponse
-		+ConvertToHTTPCommentResponse(c: entities.Comment): *presenters.HTTPResponse
-	}
-}
-
-
-	presenters.CommentPresenter ..> entities.Comment : <<use>> 
-	presenters.CommentPresenter ..> presenters.HTTPResponse : <<return>> 
-	presenters.CommentPresenter ..> entities.Comment : <<use>> 
-	presenters.CommentPresenter ..> presenters.HTTPResponse : <<return>> 
-
-package "presenters" {
-	class "ErrorPresenter" as presenters.ErrorPresenter <<V,Orchid>> {
-		+ConvertToHTTPErrorResponse(err: error): *presenters.HTTPResponse
-	}
-}
-
-
-	presenters.ErrorPresenter ..> presenters.HTTPResponse : <<return>> 
-
-package "presenters" {
-	class "HTTPResponse" as presenters.HTTPResponse <<V,Orchid>> {
-		+Items: interface{}
-	}
-}
-
-
-
-package "presenters" {
-	class "Thread" as presenters.Thread <<V,Orchid>> {
-		+ID: string
-		+BulletinBoardID: string
-		+Title: string
-		+Comments: []presenters.Comment
-	}
-}
-
-	presenters.Thread --> presenters.Comment
-
-
-package "presenters" {
-	class "ThreadPresenter" as presenters.ThreadPresenter <<V,Orchid>> {
-		+ConvertToHTTPThreadListResponse(tl: entities.Thread): *presenters.HTTPResponse
-		+ConvertToHTTPThreadResponse(t: entities.Thread): *presenters.HTTPResponse
-	}
-}
-
-
-	presenters.ThreadPresenter ..> entities.Thread : <<use>> 
-	presenters.ThreadPresenter ..> presenters.HTTPResponse : <<return>> 
-	presenters.ThreadPresenter ..> entities.Thread : <<use>> 
-	presenters.ThreadPresenter ..> presenters.HTTPResponse : <<return>> 
-
-package "api" {
-	class "Router" as api.Router <<E,#FFCC00>> {
-		+BulletinBoardController: controllers.BulletinBoardController
-		+BulletinBoardPresenter: presenters.BulletinBoardPresenter
-		+ThreadController: controllers.ThreadController
-		+ThreadPresenter: presenters.ThreadPresenter
-		+CommentController: controllers.CommentController
-		+CommentPresenter: presenters.CommentPresenter
-		+ErrorPresenter: presenters.ErrorPresenter
-		-responseByError(c: gin.Context, err: error)
-		-postThread(c: gin.Context)
-		-getThreadByID(c: gin.Context)
-		-listThread(c: gin.Context)
-		-listBulletinBoard(c: gin.Context)
-		-getBulletinBoardByID(c: gin.Context)
-		-postBulletinBoard(c: gin.Context)
-		-postComment(c: gin.Context)
-		-listComment(c: gin.Context)
-	}
-}
-
-	api.Router --> controllers.BulletinBoardController
-	api.Router --> presenters.BulletinBoardPresenter
-	api.Router --> controllers.ThreadController
-	api.Router --> presenters.ThreadPresenter
-	api.Router --> controllers.CommentController
-	api.Router --> presenters.CommentPresenter
-	api.Router --> presenters.ErrorPresenter
-
-
-package "gateways" {
-	class "InMemoryRepository" as gateways.InMemoryRepository <<E,#FFCC00>> {
-		+GetBulletinBoardByID(ID: valueobjects.BulletinBoardID): (entities.BulletinBoard, error)
-		+AddBulletinBoard(b: entities.BulletinBoard): error
-		+ListBulletinBoard(): (entities.BulletinBoard, error)
-		+ListThread(): (entities.Thread, error)
-		+ListThreadByBulletinBoardID(bID: valueobjects.BulletinBoardID): (entities.Thread, error)
-		+GetThreadByID(ID: valueobjects.ThreadID): (entities.Thread, error)
-		+AddThread(t: entities.Thread): error
-		+ListComment(): (entities.Comment, error)
-		+ListCommentByThreadID(tID: valueobjects.ThreadID): (entities.Comment, error)
-		+AddComment(c: entities.Comment): error
-		+DeleteAll()
-		+DeleteBulletinBoard(): error
-		+DeleteThread()
-		+DeleteComment()
-	}
-}
-
-
-	gateways.InMemoryRepository ..> valueobjects.BulletinBoardID : <<use>> 
-	gateways.InMemoryRepository ..> entities.BulletinBoard : <<return>> 
-	gateways.InMemoryRepository ..> entities.BulletinBoard : <<use>> 
-	gateways.InMemoryRepository ..> entities.BulletinBoard : <<return>> 
-	gateways.InMemoryRepository ..> entities.Thread : <<return>> 
-	gateways.InMemoryRepository ..> valueobjects.BulletinBoardID : <<use>> 
-	gateways.InMemoryRepository ..> entities.Thread : <<return>> 
-	gateways.InMemoryRepository ..> valueobjects.ThreadID : <<use>> 
-	gateways.InMemoryRepository ..> entities.Thread : <<return>> 
-	gateways.InMemoryRepository ..> entities.Thread : <<use>> 
-	gateways.InMemoryRepository ..> entities.Comment : <<return>> 
-	gateways.InMemoryRepository ..> valueobjects.ThreadID : <<use>> 
-	gateways.InMemoryRepository ..> entities.Comment : <<return>> 
-	gateways.InMemoryRepository ..> entities.Comment : <<use>> 
-
-package "configs" {
-	class "Config" as configs.Config <<V,Orchid>> {
-		+Environment: string
-	}
-}
-
-
-
-package "configs" {
-	interface "Configer" as configs.Configer {
-		+Get(): configs.Config
-	}
-}
-
-
-	configs.Configer ..> configs.Config : <<return>> 
-
-package "configs" {
-	class "OsConfig" as configs.OsConfig <<V,Orchid>> {
-		-config: configs.Config
-		+Get(): configs.Config
-	}
-}
-
-	configs.OsConfig --> configs.Config
-
-	configs.OsConfig ..> configs.Config : <<return>> 
-
-package "configs" {
-	class "YamlConfig" as configs.YamlConfig <<V,Orchid>> {
-		-config: configs.Config
-		+Get(): configs.Config
-	}
-}
-
-	configs.YamlConfig --> configs.Config
-
-	configs.YamlConfig ..> configs.Config : <<return>> 
-
-package "errorobjects" {
-	class "CharacterSizeValidationError" as errorobjects.CharacterSizeValidationError <<V,Orchid>> {
-		-msg: string
-		-code: int
-		+Error(): string
-	}
-}
-
-
-
-package "errorobjects" {
-	class "InternalServerError" as errorobjects.InternalServerError <<V,Orchid>> {
-		-msg: string
-		-code: int
-		+Error(): string
-	}
-}
-
-
-
-package "errorobjects" {
-	class "MissingRequiredFieldsError" as errorobjects.MissingRequiredFieldsError <<V,Orchid>> {
-		-msg: string
-		-code: int
-		+Error(): string
-	}
-}
-
-
-
-package "errorobjects" {
-	class "NotFoundError" as errorobjects.NotFoundError <<V,Orchid>> {
-		-msg: string
-		-code: int
-		+Error(): string
-	}
-}
-
-
-
-package "errorobjects" {
-	class "ParameterBindingError" as errorobjects.ParameterBindingError <<V,Orchid>> {
-		-msg: string
-		-code: int
-		+Error(): string
-	}
-}
-
-
-
-package "errorobjects" {
-	class "ResourceLimitedError" as errorobjects.ResourceLimitedError <<V,Orchid>> {
-		-msg: string
-		-code: int
-		+Error(): string
-	}
-}
-
-
-
-	usecases.CommentUsecase -up-|> usecases.CommentRepositorer
-	usecases.ThreadUsecase -up-|> usecases.ThreadRepositorer
 	gateways.InMemoryRepository -up-|> usecases.BulletinBoardRepositorer
 	gateways.InMemoryRepository -up-|> usecases.CommentRepositorer
 	gateways.InMemoryRepository -up-|> usecases.ThreadRepositorer
 	configs.OsConfig -up-|> configs.Configer
 	configs.YamlConfig -up-|> configs.Configer
+	usecases.CommentUsecase -up-|> usecases.CommentRepositorer
+	usecases.ThreadUsecase -up-|> usecases.ThreadRepositorer
 
 
 @enduml
