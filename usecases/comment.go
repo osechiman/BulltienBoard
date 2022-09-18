@@ -39,7 +39,7 @@ func (cc *CommentUsecase) AddComment(c entities.Comment) error {
 	}
 
 	if len(cs) >= CommentLimit {
-		return errorobjects.NewResourceLimitedError("maximum number of comment exceeded. comment limit is " + string(CommentLimit))
+		return errorobjects.NewResourceLimitedError("maximum number of comment exceeded. comment limit is " + string(rune(CommentLimit)))
 	}
 
 	return cc.CommentRepository.AddComment(c)
