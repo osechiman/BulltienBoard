@@ -7,7 +7,7 @@ lint:
 	go vet ./... && golint ./...
 
 GOPATH=$$(go env GOPATH)
-GOUML="$(GOPATH)/bin/gouml"
+GOPLANTUML="$(GOPATH)/bin/goplantuml"
 build:
-	go build && $(GOUML) i && mv ./file.puml ./documents/classdiagram.puml
+	go build && $(GOPLANTUML) -show-aggregations -aggregate-private-members -title BulitienBoard -recursive -output ./documents/calssdiagram.puml .
 
