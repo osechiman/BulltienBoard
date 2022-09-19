@@ -1,0 +1,438 @@
+@startuml
+title BulitienBoard
+namespace api {
+    class Router << (S,Aquamarine) >> {
+        + BulletinBoardController *controllers.BulletinBoardController
+        + BulletinBoardPresenter *presenters.BulletinBoardPresenter
+        + ThreadController *controllers.ThreadController
+        + ThreadPresenter *presenters.ThreadPresenter
+        + CommentController *controllers.CommentController
+        + CommentPresenter *presenters.CommentPresenter
+        + ErrorPresenter *presenters.ErrorPresenter
+
+        - listBulletinBoard(c *gin.Context) 
+        - getBulletinBoardByID(c *gin.Context) 
+        - postBulletinBoard(c *gin.Context) 
+        - postComment(c *gin.Context) 
+        - listComment(c *gin.Context) 
+        - responseByError(c *gin.Context, err error) 
+        - postThread(c *gin.Context) 
+        - getThreadByID(c *gin.Context) 
+        - listThread(c *gin.Context) 
+
+    }
+}
+
+
+"api.Router" o-- "controllers.BulletinBoardController"
+"api.Router" o-- "controllers.CommentController"
+"api.Router" o-- "controllers.ThreadController"
+"api.Router" o-- "presenters.BulletinBoardPresenter"
+"api.Router" o-- "presenters.CommentPresenter"
+"api.Router" o-- "presenters.ErrorPresenter"
+"api.Router" o-- "presenters.ThreadPresenter"
+
+namespace configs {
+    class Config << (S,Aquamarine) >> {
+        + Environment string
+
+    }
+    interface Configer  {
+        + Get() Config
+
+    }
+    class OsConfig << (S,Aquamarine) >> {
+        - config Config
+
+        + Get() Config
+
+    }
+    class YamlConfig << (S,Aquamarine) >> {
+        - config Config
+
+        + Get() Config
+
+    }
+}
+
+"configs.Configer" <|-- "configs.OsConfig"
+"configs.Configer" <|-- "configs.YamlConfig"
+
+"configs.OsConfig" o-- "configs.Config"
+"configs.YamlConfig" o-- "configs.Config"
+
+namespace controllers {
+    class BulletinBoard << (S,Aquamarine) >> {
+        + ID string
+        + Title string
+
+    }
+    class BulletinBoardController << (S,Aquamarine) >> {
+        - bbu *usecases.BulletinBoardUsecase
+
+        + GetBulletinBoardByID(ID string) (entities.BulletinBoard, error)
+        + AddBulletinBoard(c *gin.Context) (entities.BulletinBoard, error)
+        + ListBulletinBoard() ([]entities.BulletinBoard, error)
+
+    }
+    class Comment << (S,Aquamarine) >> {
+        + ID string
+        + ThreadID string
+        + Text string
+
+    }
+    class CommentController << (S,Aquamarine) >> {
+        - cu *usecases.CommentUsecase
+
+        + AddComment(c *gin.Context) (entities.Comment, error)
+        + ListComment() ([]entities.Comment, error)
+        + ListCommentByThreadID(tID string) ([]entities.Comment, error)
+
+    }
+    class Thread << (S,Aquamarine) >> {
+        + ID string
+        + BulletinBoardID string
+        + Title string
+
+    }
+    class ThreadController << (S,Aquamarine) >> {
+        - tu *usecases.ThreadUsecase
+
+        + GetThreadByID(ID string) (entities.Thread, error)
+        + AddThread(c *gin.Context) (entities.Thread, error)
+        + ListThread() ([]entities.Thread, error)
+        + ListThreadByBulletinBoardID(bID string) ([]entities.Thread, error)
+
+    }
+}
+
+
+"controllers.BulletinBoardController" o-- "usecases.BulletinBoardUsecase"
+"controllers.CommentController" o-- "usecases.CommentUsecase"
+"controllers.ThreadController" o-- "usecases.ThreadUsecase"
+
+namespace entities {
+    class BulletinBoard << (S,Aquamarine) >> {
+        + ID BulletinBoardIDer
+        + Title string
+        + Threads []Thread
+
+    }
+    interface BulletinBoardIDer  {
+        + Get() valueobjects.BulletinBoardID
+        + String() string
+        + Equals(id valueobjects.BulletinBoardID) bool
+
+    }
+    class Comment << (S,Aquamarine) >> {
+        + ID CommentIDer
+        + ThreadID ThreadIDer
+        + Text string
+        + CreateAt CommentTimer
+
+    }
+    interface CommentIDer  {
+        + Get() valueobjects.CommentID
+        + String() string
+
+    }
+    interface CommentTimer  {
+        + Get() valueobjects.CommentTime
+        + ToUnixTime() int64
+        + Equals(ct valueobjects.CommentTime) bool
+
+    }
+    class Thread << (S,Aquamarine) >> {
+        + ID ThreadIDer
+        + BulletinBoardID BulletinBoardIDer
+        + Title string
+        + Comments []Comment
+
+    }
+    interface ThreadIDer  {
+        + Get() valueobjects.ThreadID
+        + String() string
+        + Equals(id valueobjects.ThreadID) bool
+
+    }
+}
+
+
+"entities.BulletinBoard" o-- "entities.BulletinBoardIDer"
+"entities.BulletinBoard" o-- "entities.Thread"
+"entities.Comment" o-- "entities.CommentIDer"
+"entities.Comment" o-- "entities.CommentTimer"
+"entities.Comment" o-- "entities.ThreadIDer"
+"entities.Thread" o-- "entities.BulletinBoardIDer"
+"entities.Thread" o-- "entities.Comment"
+"entities.Thread" o-- "entities.ThreadIDer"
+
+namespace errorobjects {
+    class CharacterSizeValidationError << (S,Aquamarine) >> {
+        - msg string
+        - code int
+
+        + Error() string
+
+    }
+    class InternalServerError << (S,Aquamarine) >> {
+        - msg string
+        - code int
+
+        + Error() string
+
+    }
+    class MissingRequiredFieldsError << (S,Aquamarine) >> {
+        - msg string
+        - code int
+
+        + Error() string
+
+    }
+    class NotFoundError << (S,Aquamarine) >> {
+        - msg string
+        - code int
+
+        + Error() string
+
+    }
+    class ParameterBindingError << (S,Aquamarine) >> {
+        - msg string
+        - code int
+
+        + Error() string
+
+    }
+    class ResourceLimitedError << (S,Aquamarine) >> {
+        - msg string
+        - code int
+
+        + Error() string
+
+    }
+}
+
+
+
+namespace gateways {
+    class InMemoryRepository << (S,Aquamarine) >> {
+        + GetBulletinBoardByID(ID valueobjects.BulletinBoardID) (entities.BulletinBoard, error)
+        + AddBulletinBoard(b entities.BulletinBoard) error
+        + ListBulletinBoard() ([]entities.BulletinBoard, error)
+        + ListThread() ([]entities.Thread, error)
+        + ListThreadByBulletinBoardID(bID valueobjects.BulletinBoardID) ([]entities.Thread, error)
+        + GetThreadByID(ID valueobjects.ThreadID) (entities.Thread, error)
+        + AddThread(t entities.Thread) error
+        + ListComment() ([]entities.Comment, error)
+        + ListCommentByThreadID(tID valueobjects.ThreadID) ([]entities.Comment, error)
+        + AddComment(c entities.Comment) error
+        + DeleteAll() 
+        + DeleteBulletinBoard() error
+        + DeleteThread() 
+        + DeleteComment() 
+
+    }
+}
+
+"usecases.BulletinBoardRepositorer" <|-- "gateways.InMemoryRepository"
+"usecases.CommentRepositorer" <|-- "gateways.InMemoryRepository"
+"usecases.ThreadRepositorer" <|-- "gateways.InMemoryRepository"
+
+
+namespace logger {
+    class LogColumns << (S,Aquamarine) >> {
+        + PID string
+        + UA string
+        + Path string
+        + Body []byte
+
+        + Error(c *gin.Context, msg <font color=blue>interface</font>{}) 
+        + Info(c *gin.Context, msg <font color=blue>interface</font>{}) 
+        + Debug(c *gin.Context, msg <font color=blue>interface</font>{}) 
+        + Warn(c *gin.Context, msg <font color=blue>interface</font>{}) 
+
+    }
+    interface Logger  {
+        + Error(c *context.Context, msg <font color=blue>interface</font>{}) 
+        + Info(c *context.Context, msg <font color=blue>interface</font>{}) 
+        + Debug(c *context.Context, msg <font color=blue>interface</font>{}) 
+        + Warn(c *context.Context, msg <font color=blue>interface</font>{}) 
+
+    }
+}
+
+
+
+namespace presenters {
+    class BulletinBoard << (S,Aquamarine) >> {
+        + ID string
+        + Title string
+        + Threads []Thread
+
+    }
+    class BulletinBoardPresenter << (S,Aquamarine) >> {
+        + ConvertToHTTPBulletinBoardListResponse(bbl []entities.BulletinBoard) *HTTPResponse
+        + ConvertToHTTPBulletinBoardResponse(bb entities.BulletinBoard) *HTTPResponse
+
+    }
+    class Comment << (S,Aquamarine) >> {
+        + ID string
+        + ThreadID string
+        + Text string
+        + CreatAt int64
+
+    }
+    class CommentPresenter << (S,Aquamarine) >> {
+        + ConvertToHTTPCommentListResponse(cl []entities.Comment) *HTTPResponse
+        + ConvertToHTTPCommentResponse(c entities.Comment) *HTTPResponse
+
+    }
+    class ErrorPresenter << (S,Aquamarine) >> {
+        + ConvertToHTTPErrorResponse(err error) *HTTPResponse
+
+    }
+    class HTTPResponse << (S,Aquamarine) >> {
+        + Items <font color=blue>interface</font>{}
+
+    }
+    class Thread << (S,Aquamarine) >> {
+        + ID string
+        + BulletinBoardID string
+        + Title string
+        + Comments []Comment
+
+    }
+    class ThreadPresenter << (S,Aquamarine) >> {
+        + ConvertToHTTPThreadListResponse(tl []entities.Thread) *HTTPResponse
+        + ConvertToHTTPThreadResponse(t entities.Thread) *HTTPResponse
+
+    }
+}
+
+
+"presenters.BulletinBoard" o-- "presenters.Thread"
+"presenters.Thread" o-- "presenters.Comment"
+
+namespace usecases {
+    interface BulletinBoardRepositorer  {
+        + GetBulletinBoardByID(ID valueobjects.BulletinBoardID) (entities.BulletinBoard, error)
+        + ListBulletinBoard() ([]entities.BulletinBoard, error)
+        + AddBulletinBoard(bb entities.BulletinBoard) error
+        + DeleteBulletinBoard() error
+
+    }
+    class BulletinBoardUsecase << (S,Aquamarine) >> {
+        + BulletinBoardRepository BulletinBoardRepositorer
+        + ThreadRepository ThreadRepositorer
+
+        + GetBulletinBoardByID(ID valueobjects.BulletinBoardID) (entities.BulletinBoard, error)
+        + AddBulletinBoard(bb entities.BulletinBoard) error
+        + ListBulletinBoard() ([]entities.BulletinBoard, error)
+
+    }
+    interface CommentRepositorer  {
+        + ListComment() ([]entities.Comment, error)
+        + ListCommentByThreadID(tID valueobjects.ThreadID) ([]entities.Comment, error)
+        + AddComment(c entities.Comment) error
+
+    }
+    class CommentUsecase << (S,Aquamarine) >> {
+        + CommentRepository CommentRepositorer
+        + ThreadRepository ThreadRepositorer
+
+        + AddComment(c entities.Comment) error
+        + ListComment() ([]entities.Comment, error)
+        + ListCommentByThreadID(tID valueobjects.ThreadID) ([]entities.Comment, error)
+
+    }
+    interface ThreadRepositorer  {
+        + GetThreadByID(ID valueobjects.ThreadID) (entities.Thread, error)
+        + ListThread() ([]entities.Thread, error)
+        + ListThreadByBulletinBoardID(bID valueobjects.BulletinBoardID) ([]entities.Thread, error)
+        + AddThread(t entities.Thread) error
+
+    }
+    class ThreadUsecase << (S,Aquamarine) >> {
+        + ThreadRepository ThreadRepositorer
+        + BulletinBoardRepository BulletinBoardRepositorer
+        + CommentRepository CommentRepositorer
+
+        + GetThreadByID(ID valueobjects.ThreadID) (entities.Thread, error)
+        + AddThread(t entities.Thread) error
+        + ListThread() ([]entities.Thread, error)
+        + ListThreadByBulletinBoardID(bID valueobjects.BulletinBoardID) ([]entities.Thread, error)
+
+    }
+}
+
+"usecases.CommentRepositorer" <|-- "usecases.CommentUsecase"
+"usecases.ThreadRepositorer" <|-- "usecases.ThreadUsecase"
+
+"usecases.BulletinBoardUsecase" o-- "usecases.BulletinBoardRepositorer"
+"usecases.BulletinBoardUsecase" o-- "usecases.ThreadRepositorer"
+"usecases.CommentUsecase" o-- "usecases.CommentRepositorer"
+"usecases.CommentUsecase" o-- "usecases.ThreadRepositorer"
+"usecases.ThreadUsecase" o-- "usecases.BulletinBoardRepositorer"
+"usecases.ThreadUsecase" o-- "usecases.CommentRepositorer"
+"usecases.ThreadUsecase" o-- "usecases.ThreadRepositorer"
+
+namespace valueobjects {
+    class BulletinBoardID << (S,Aquamarine) >> {
+        - id bulletinBoardID
+        - str string
+
+        + Get() BulletinBoardID
+        + String() string
+        + Equals(other BulletinBoardID) bool
+
+    }
+    class CommentID << (S,Aquamarine) >> {
+        - id commentID
+        - str string
+
+        + Get() CommentID
+        + String() string
+        + Equals(other CommentID) bool
+
+    }
+    class CommentTime << (S,Aquamarine) >> {
+        - unixTime int64
+
+        + Get() CommentTime
+        + ToUnixTime() int64
+        + Equals(other CommentTime) bool
+
+    }
+    class ThreadID << (S,Aquamarine) >> {
+        - id threadID
+        - str string
+
+        + Get() ThreadID
+        + String() string
+        + Equals(other ThreadID) bool
+
+    }
+    class valueobjects.bulletinBoardID << (T, #FF7700) >>  {
+    }
+    class valueobjects.commentID << (T, #FF7700) >>  {
+    }
+    class valueobjects.threadID << (T, #FF7700) >>  {
+    }
+    class "uuid.UUID" as uuidUUID {
+        'This class was created so that we can correctly have an alias pointing to this name. Since it contains dots that can break namespaces
+    }
+}
+
+"entities.BulletinBoardIDer" <|-- "valueobjects.BulletinBoardID"
+"entities.CommentIDer" <|-- "valueobjects.CommentID"
+"entities.CommentTimer" <|-- "valueobjects.CommentTime"
+"entities.ThreadIDer" <|-- "valueobjects.ThreadID"
+
+"valueobjects.BulletinBoardID" o-- "valueobjects.bulletinBoardID"
+"valueobjects.CommentID" o-- "valueobjects.commentID"
+"valueobjects.ThreadID" o-- "valueobjects.threadID"
+
+"valueobjects.uuidUUID" #.. "valueobjects.bulletinBoardID"
+"valueobjects.uuidUUID" #.. "valueobjects.commentID"
+"valueobjects.uuidUUID" #.. "valueobjects.threadID"
+@enduml
