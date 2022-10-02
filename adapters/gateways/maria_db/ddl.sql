@@ -1,6 +1,6 @@
--- MySQL dump 10.13  Distrib 5.5.62, for Win64 (AMD64)
+-- MySQL dump 11.13  Distrib 5.5.62, for Win64 (AMD64)
 --
--- Host: localhost    Database: BulltienBoard
+-- Host: localhost    Database: BulletinBoard
 -- ------------------------------------------------------
 -- Server version	5.5.5-10.9.2-MariaDB-1:10.9.2+maria~ubu2204
 
@@ -16,18 +16,18 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `BulltienBoard`
+-- Table structure for table `BulletinBoard`
 --
 
-DROP TABLE IF EXISTS `BulltienBoard`;
+DROP TABLE IF EXISTS `BulletinBoard`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `BulltienBoard` (
-  `id` varchar(36) NOT NULL COMMENT 'BulltienBoardのID\r\nUUIDを期待しています',
-  `title` varchar(50) NOT NULL COMMENT 'BulltienBoardのタイトル',
+CREATE TABLE `BulletinBoard` (
+  `id` varchar(36) NOT NULL COMMENT 'BulletinBoardのID\r\nUUIDを期待しています',
+  `title` varchar(50) NOT NULL COMMENT 'BulletinBoardのタイトル',
   `thread_id` varchar(36) NOT NULL COMMENT 'ThreadのID\r\nBullitienBoardにぶら下がるThreadのIDが格納されます',
   PRIMARY KEY (`id`),
-  KEY `BulltienBoard_FK` (`thread_id`)
+  KEY `BulletinBoard_FK` (`thread_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='BulletinBoard情報を保存するためのテーブル';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -60,18 +60,18 @@ DROP TABLE IF EXISTS `Thread`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `Thread` (
   `id` varchar(36) NOT NULL COMMENT 'ThreadのID\r\nUUIDを期待しています',
-  `bulltien_board_id` varchar(36) NOT NULL COMMENT 'BulltienBoardのID\r\nUUIDを期待しています',
+  `bulltien_board_id` varchar(36) NOT NULL COMMENT 'BulletinBoardのID\r\nUUIDを期待しています',
   `title` varchar(50) NOT NULL COMMENT 'Threadのタイトル',
   `comment_id` varchar(36) NOT NULL COMMENT 'CommentのID\r\nUUIDを期待しています',
   PRIMARY KEY (`id`),
   KEY `Thread_FK_1` (`comment_id`),
   KEY `Thread_FK` (`bulltien_board_id`),
-  CONSTRAINT `Thread_FK` FOREIGN KEY (`bulltien_board_id`) REFERENCES `BulltienBoard` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `Thread_FK` FOREIGN KEY (`bulltien_board_id`) REFERENCES `BulletinBoard` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='Thread情報を保存するためのテーブル';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping routines for database 'BulltienBoard'
+-- Dumping routines for database 'BulletinBoard'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
