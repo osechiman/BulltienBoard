@@ -13,4 +13,6 @@ const (
 	ErrorCodeCharacterSizeValidation
 	// ErrorCodeResourceLimitedError は保存可能なデータ件数の閾値を超えている level:Warn
 	ErrorCodeResourceLimitedError
+	// ErrorCodeDatabaseConnectionError はデータベース接続ができていない level:Error
+	ErrorCodeDatabaseConnectionError
 )

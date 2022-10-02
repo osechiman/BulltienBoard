@@ -1,10 +1,23 @@
 package main
 
 import (
-	"bulltienboard/adapters/middlewares/di"
-	"bulltienboard/drivers/web/api"
+	gateways "bulltienboard/adapters/gateways/maria_db"
+	"bulltienboard/entities/valueobjects"
+	"fmt"
 )
 
 func main() {
-	api.Listen(di.InitializeRouter())
+	db, _ := gateways.NewMariaDBRepository(
+		"localhost",
+		3306,
+		"BulletinBoard",
+		"root",
+		"my-secret-pw",
+	)
+	row, _ := db.GetBulletinBoardByID(valueobjects.BulletinBoardID{})
+
+	fmt.Printf("db: %v", db)
+	fmt.Printf("row: %v", row)
+
+	//api.Listen(di.InitializeRouter())
 }

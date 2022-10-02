@@ -1,3 +1,4 @@
+//go:build wireinject
 // +build wireinject
 
 package di
@@ -11,6 +12,17 @@ import (
 
 	"github.com/google/wire"
 )
+
+func ProvideMariaDBRepository() *gateways.MariaDBRepository {
+	md, _ := gateways.NewMariaDBRepository(
+		"localhost",
+		3306,
+		"BulltienBoard",
+		"root",
+		"my-secret-pw",
+	)
+	return md
+}
 
 func InitializeRouter() *api.Router {
 	// api.NewRouterで生成する値に必要なプロバイダ(コンストラクタ)を全て列挙します。
@@ -30,10 +42,14 @@ func InitializeRouter() *api.Router {
 		usecases.NewBulletinBoardUsecase,
 		usecases.NewThreadUsecase,
 		usecases.NewCommentUsecase,
-		gateways.NewInMemoryRepository,
-		wire.Bind(new(usecases.BulletinBoardRepositorer), new(*gateways.InMemoryRepository)),
-		wire.Bind(new(usecases.ThreadRepositorer), new(*gateways.InMemoryRepository)),
-		wire.Bind(new(usecases.CommentRepositorer), new(*gateways.InMemoryRepository)),
+		//gateways.NewInMemoryRepository,
+		ProvideMariaDBRepository,
+		// wire.Bind(new(usecases.BulletinBoardRepositorer), new(*gateways.InMemoryRepository)),
+		wire.Bind(new(usecases.BulletinBoardRepositorer), ProvideMariaDBRepository),
+		// wire.Bind(new(usecases.ThreadRepositorer), new(*gateways.InMemoryRepository)),
+		wire.Bind(new(usecases.ThreadRepositorer), ProvideMariaDBRepository),
+		// wire.Bind(new(usecases.CommentRepositorer), new(*gateways.InMemoryRepository)),
+		wire.Bind(new(usecases.CommentRepositorer), ProvideMariaDBRepository),
 	)
 	return &api.Router{}
 }
